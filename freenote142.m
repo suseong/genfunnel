@@ -160,10 +160,11 @@ P1 = R2'*diag(mainAxis)/norm(mainAxis)*R2;
 
 %%
 figure(100);clf;
-P = reshape(double(sVars),6,6);
+P = reshape(double(sVars(:,end)),6,6);
 for kk=1:3
 subplot(1,3,kk)
-p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)]/(value(rho));
+% p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)]/(value(rho));
+p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)];
 p2 = [initRegion(kk,kk) initRegion(kk,kk+3);initRegion(kk+3,kk) initRegion(kk+3,kk+3)];
 invp1 = inv(sqrtm(p1));
 invp2 = inv(sqrtm(p2));
