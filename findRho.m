@@ -1,37 +1,16 @@
-function [rho,sOut,p,solProblem] = findRho(dt,A,Lc1,Lc3,initRegion)
+function [rho,sOut,p,solProblem] = findRho(dt,A,Lc1,Lc3,initRegion,Kp,Kd)
 
 checkDependency('yalmip');
 monomialOrder = 2;
+Er = 0.1;
+
 N = size(Lc1,2);
 rho = sdpvar(N+1,1);
 e = sdpvar(6,1);
-
-constraints = [];
-vars = rho;
-cost = 0;
-pVars = [];
-sVars = [];
-sOut = [];
-
-k=1;
-
-[L1,coeff1] = polynomial(e,monomialOrder);
-[L2,coeff2] = polynomial(e,monomialOrder);
-[L3,coeff3] = polynomial(e,monomialOrder);
-
-rhodot(k) = (rho(k+1) - rho(k))/dt;
-
-L1 = replace(L1,coeff1,value(Lc1(:,k)));
-% L2 = replace(L2,coeff2,value(Lc2));
-L3 = replace(L3,coeff3,value(Lc3(:,k)));
-
-% p = sdpvar(6,1);
-% P = [ p(1)   0    0  p(3)   0    0;
-%         0  p(1)   0    0  p(3)   0;
-%         0    0  p(2)   0    0  p(4);
-%       p(3)   0    0  p(5)   0    0;
-%         0  p(3)   0    0  p(5)   0;
-%         0    0  p(4)   0    0  p(6)];
+epbar = sdpvar(1,1);
+edbar = sdpvar(1,1);
+epep = e(1:3)'*e(1:3);
+eded = e(4:6)'*e(4:6); 
 
 p = sdpvar(5,1);
 P = [   1    0    0  p(2)   0    0;
@@ -41,27 +20,67 @@ P = [   1    0    0  p(2)   0    0;
         0  p(2)   0    0  p(4)   0;
         0    0  p(3)   0    0  p(5)];
 
+maxKp = max(max(Kp));
+maxKd = max(max(Kd));
+maxPpv = p(2); maxPv = p(4);
+    
 V = e'*P*e;
-Vdot = e'*(P*A+A'*P)*e;
+Vdot = e'*(A'*P + P*A)*e ...
+       + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 20);
+    
+
+constraints = [];
+vars = rho;
+cost = 0;
+pVars = p;
+sVars = [];
+sOut = [];
+
+k=1;
 
 S = sdpvar(6,6);
-    
-vars = [vars;coeff2];
-pVars = [pVars;p];
-sVars = [sVars;S(:)];
-sOut = [sOut S(:)];
 
-c1 = sos(rhodot(k) - Vdot - L1*(rho(k) - V));
+[L1,coeff1] = polynomial([e;epbar;edbar],monomialOrder);
+[L2,coeff2] = polynomial(e,monomialOrder);
+[L3,coeff3] = polynomial(e,monomialOrder);
+
+[L4,coeff4] = polynomial([e;epbar;edbar],monomialOrder);
+[L5,coeff5] = polynomial([e;epbar;edbar],monomialOrder);
+[L6,coeff6] = polynomial([e;epbar;edbar],monomialOrder);
+[L7,coeff7] = polynomial([e;epbar;edbar],monomialOrder);
+
+rhodot(k) = (rho(k+1) - rho(k))/dt;
+
+L1 = replace(L1,coeff1,value(Lc1(:,k)));
+L3 = replace(L3,coeff3,value(Lc3(:,k)));
+
+c1 = sos(rhodot(k) - Vdot ...
+         - L1*(rho(k) - V) ...
+         - L4*(epbar^2 - epep) ...
+         - L5*(edbar^2 - eded) ...
+         - L6*(edbar) ...
+         - L7*(epbar));
 c2 = sos(rho(k) - V - L2*(1-e'*initRegion*e));
 c3 = sos(L2);
 c4 = sos(1 - e'*S*e - L3*(rho(k) - V));
-c5 = S >= 0;
-constraints = [constraints c1 c2 c3 c4 c5];
+c5 = sos(L6);
+c6 = sos(L7);
+c7 = S >= 0;
+constraints = [constraints c1 c2 c3 c4 c5 c6 c7];
 cost = cost + geomean(S);
 
+vars = [vars;coeff2;coeff4;coeff5;coeff6;coeff7];
+sVars = [sVars;S(:)];
+sOut = [sOut S(:)];
+
 for k=2:N
-    [L1,coeff1] = polynomial(e,monomialOrder);
+    [L1,coeff1] = polynomial([e;epbar;edbar],monomialOrder);
     [L3,coeff3] = polynomial(e,monomialOrder);
+
+    [L4,coeff4] = polynomial([e;epbar;edbar],monomialOrder);
+    [L5,coeff5] = polynomial([e;epbar;edbar],monomialOrder);
+    [L6,coeff6] = polynomial([e;epbar;edbar],monomialOrder);
+    [L7,coeff7] = polynomial([e;epbar;edbar],monomialOrder);
 
     rhodot(k) = (rho(k+1) - rho(k))/dt;
 
@@ -69,14 +88,21 @@ for k=2:N
     L3 = replace(L3,coeff3,value(Lc3(:,k)));
         
     S = sdpvar(6,6);
-    sVars = [sVars;S(:)];
+    sVars = [sVars;coeff4;coeff5;coeff6;coeff7;S(:)];
     sOut = [sOut S(:)];
+    
+    c1 = sos(rhodot(k) - Vdot ...
+             - L1*(rho(k) - V) ...
+             - L4*(epbar^2 - epep) ...
+             - L5*(edbar^2 - eded) ...
+             - L6*(edbar) ...
+             - L7*(epbar));    
+    c4 = sos(1 - e'*S*e - L3*(rho(k) - V)); 
+    c5 = sos(L6);
+    c6 = sos(L7);
+    c7 = S >= 0;
 
-    c1 = sos(rhodot(k) - Vdot - L1*(rho(k) - V));
-%     c3 = sos(L3);
-    c4 = sos(1 - e'*S*e - L3*(rho(k) - V));
-    c5 = S >= 0;
-    constraints = [constraints c1 c4 c5];
+    constraints = [constraints c1 c4 c5 c6 c7];
     cost = cost + geomean(S);
 end
 
