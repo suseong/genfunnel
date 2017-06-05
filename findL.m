@@ -6,15 +6,15 @@ N = length(rho)-1;
 coeff1_ = [];
 coeff3_ = [];
 S_ = [];
-Er = 0.1;
+Er = 0.08;
 
 maxPpv = max(max(P(1:3,4:6)));
-maxPp = max(max(P(1:3,1:3)));
+% maxPp = max(max(P(1:3,1:3)));
 maxPv = max(max(P(4:6,4:6)));
 maxKp = max(max(Kp));
 maxKd = max(max(Kd));
 
-for i=1:N
+parfor i=1:N
    if i==1
        e = sdpvar(6,1);
        S = sdpvar(6,6);
@@ -34,7 +34,7 @@ for i=1:N
        
        V = e'*P*e;
        Vdot = e'*Q*e ...
-              + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 20);
+              + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
    
        c1 = sos(rhodot(i) - Vdot ...
                 - L1*(rho(i) - V) ...
@@ -43,7 +43,7 @@ for i=1:N
                 - L6*(edbar) ...
                 - L7*(epbar));    
        c2 = sos(L2);
-       c3 = sos(rho(i) -V - L2*(1-e'*initRegion*e));
+       c3 = sos(rho(i) - V - L2*(1-e'*initRegion*e));
        c4 = sos(L3);
        c5 = sos(1 - e'*S*e - L3*(rho(i) - V)); 
        c6 = sos(L6);
@@ -84,7 +84,7 @@ for i=1:N
        
        V = e'*P*e;
        Vdot = e'*Q*e ...
-              + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 20);
+              + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
    
        c1 = sos(rhodot(i) - Vdot ...
                 - L1*(rho(i) - V) ...

@@ -5,7 +5,7 @@ clc
 checkDependency('yalmip');
 
 e = sdpvar(6,1);
-dt = 0.01;
+dt = 0.03;
 
 initRegion = diag(1./[0.5 0.5 0.5 1.6 1.6 1.6].^2);
 
@@ -23,7 +23,7 @@ maxPv = max(max(P(4:6,4:6)));
 maxKp = max(max(Kp));
 maxKd = max(max(Kd));
 
-Er = 0.1;
+Er = 0.08;
 
 rho = sdpvar(1,1);
 rhodot = sdpvar(1,1);
@@ -33,28 +33,26 @@ edbar = sdpvar(1,1);
 epep = e(1:3)'*e(1:3);
 eded = e(4:6)'*e(4:6);
 V = e'*P*e;
-% Vdot = e'*(P*A+A'*P)*e + Er*(maxPpv*maxKp*epep+maxPv*maxKd*eded) ...
-%        + Er*((maxPpv*maxKd+maxPv*maxKp)*epbar*edbar) ...
-%        + Er*(30*(maxPpv*epbar+maxPv*edbar));
 
 Vdot = e'*(P*A+A'*P)*e ...
-       + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 20);
+       + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
 
 monomialOrder = 2;
 [L_init,coeff_init] = polynomial(e,monomialOrder);
 
 c1 = sos(L_init);
-c2 = sos(rho - V - L_init*(1 - e'*initRegion*e));
+c2 = sos(rho - V - L_init*(1-e'*initRegion*e));
 
 sol = solvesos([c1 c2],rho,[],coeff_init);
 rhoInit = value(rho);
 
-N = 10;
+N = 200;
 rhoTemp = rhoInit;
-rhoCont = [rhoInit];
+rhoCont = rhoInit;
 
 for i=1:N
-    [L1,coeff1] = polynomial(e,monomialOrder);
+%     [L1,coeff1] = polynomial(e,monomialOrder);
+    [L1,coeff1] = polynomial([e;epbar;edbar],monomialOrder);
     [L2,coeff2] = polynomial([e;epbar;edbar],monomialOrder);
     [L3,coeff3] = polynomial([e;epbar;edbar],monomialOrder);
     [L4,coeff4] = polynomial([e;epbar;edbar],monomialOrder);
@@ -82,17 +80,25 @@ ts = linspace(0,dt*(N-1),N);
 rhodot = diff(rhoCont)/dt;
 
 [coeffL1,coeffL3,S_] = findL(P,P*A +A'*P,rhoCont,rhodot,initRegion,Kp,Kd);
-% [coeffL1,coeffL3,S_] = findL(P,P*A +A'*P,rhoInit*ones(N,1),zeros(N,1),initRegion,Kp,Kd);
 
 %%
-[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd);
+for kk = 1:3
+[rho,sVars,p,solProblem] = findRho(dt,rhoInit,P,A,coeffL1,coeffL3,initRegion,Kp,Kd);
 
 %%
 ts = linspace(0,dt*(N-1),N);
 rhodot = diff(rho)/dt;
 
+% P = [   1    0    0  p(2)   0    0;
+%         0    1    0    0  p(2)   0;
+%         0    0  p(1)   0    0  p(3);
+%       p(2)   0    0  p(4)   0    0;
+%         0  p(2)   0    0  p(4)   0;
+%         0    0  p(3)   0    0  p(5)];
+    
 [coeffL1,coeffL3,S_] = findL(P,P*A +A'*P,rho,rhodot,initRegion,Kp,Kd);
 
+end
 %%
 figure(100);
 P = reshape(double(sVars(:,end)),6,6);

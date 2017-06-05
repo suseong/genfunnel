@@ -1,8 +1,8 @@
-function [rho,sOut,p,solProblem] = findRho(dt,A,Lc1,Lc3,initRegion,Kp,Kd)
+function [rho,sOut,p,solProblem] = findRho(dt,rhoInit,P,A,Lc1,Lc3,initRegion,Kp,Kd)
 
 checkDependency('yalmip');
 monomialOrder = 2;
-Er = 0.1;
+Er = 0.08;
 
 N = size(Lc1,2);
 rho = sdpvar(N+1,1);
@@ -10,8 +10,10 @@ e = sdpvar(6,1);
 epbar = sdpvar(1,1);
 edbar = sdpvar(1,1);
 epep = e(1:3)'*e(1:3);
-eded = e(4:6)'*e(4:6); 
+eded = e(4:6)'*e(4:6);
+assign(rho(1),rhoInit);
 
+% P = sdpvar(6,6);
 p = sdpvar(5,1);
 P = [   1    0    0  p(2)   0    0;
         0    1    0    0  p(2)   0;
@@ -22,17 +24,20 @@ P = [   1    0    0  p(2)   0    0;
 
 maxKp = max(max(Kp));
 maxKd = max(max(Kd));
-maxPpv = p(2); maxPv = p(4);
+% maxPpv = max(max(P(1:3,4:6)));
+% maxPv = max(max(P(4:6,4:6)));
+maxPpv = p(2); maxPv = p(4); % need to fix
+% maxPpv = 0.04; maxPv = 0.1;
     
 V = e'*P*e;
 Vdot = e'*(A'*P + P*A)*e ...
-       + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 20);
-    
-
+       + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
+   
 constraints = [];
 vars = rho;
 cost = 0;
 pVars = p;
+% pVars = [];
 sVars = [];
 sOut = [];
 
@@ -84,12 +89,16 @@ for k=2:N
 
     rhodot(k) = (rho(k+1) - rho(k))/dt;
 
-    L1 = replace(L1,coeff1,Lc1(:,k));
+    L1 = replace(L1,coeff1,value(Lc1(:,k)));
     L3 = replace(L3,coeff3,value(Lc3(:,k)));
         
     S = sdpvar(6,6);
     sVars = [sVars;coeff4;coeff5;coeff6;coeff7;S(:)];
     sOut = [sOut S(:)];
+    
+    V = e'*P*e;
+    Vdot = e'*(A'*P + P*A)*e ...
+           + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
     
     c1 = sos(rhodot(k) - Vdot ...
              - L1*(rho(k) - V) ...
@@ -112,6 +121,7 @@ solProblem = sol.problem;
 rho = value(rho);
 sOut = value(sOut);
 p = value(p);
+% p = 0;
 
 end
 
