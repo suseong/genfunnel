@@ -1,8 +1,9 @@
-function my_phase(IC)
-[~,X] = ode45(@EOM,[0 10],IC);
+function my_phase(IC,k)
+[~,X] = ode45(@EOM,[0 0.005*k],IC);
 u = X(:,1);
 w = X(:,2);
-plot(u,w,'r')
+plot(u(end),w(end),'x')
+% plot(u,w)
 xlabel('u')
 ylabel('w')
 grid

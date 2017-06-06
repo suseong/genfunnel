@@ -1,8 +1,9 @@
-function [rho,sOut,p,solProblem] = findRho(dt,rhoInit,P,A,Lc1,Lc3,initRegion,Kp,Kd)
+function [rho,sOut,p_,solProblem] = findRho(dt,rhoInit,A,Lc1,Lc3,initRegion,Kp,Kd)
 
 checkDependency('yalmip');
 monomialOrder = 2;
-Er = 0.08;
+Er = 0.1;
+max_ar = 0;
 
 N = size(Lc1,2);
 rho = sdpvar(N+1,1);
@@ -12,31 +13,37 @@ edbar = sdpvar(1,1);
 epep = e(1:3)'*e(1:3);
 eded = e(4:6)'*e(4:6);
 assign(rho(1),rhoInit);
-
-% P = sdpvar(6,6);
-p = sdpvar(5,1);
-P = [   1    0    0  p(2)   0    0;
-        0    1    0    0  p(2)   0;
-        0    0  p(1)   0    0  p(3);
-      p(2)   0    0  p(4)   0    0;
-        0  p(2)   0    0  p(4)   0;
-        0    0  p(3)   0    0  p(5)];
-
 maxKp = max(max(Kp));
 maxKd = max(max(Kd));
-% maxPpv = max(max(P(1:3,4:6)));
-% maxPv = max(max(P(4:6,4:6)));
-maxPpv = p(2); maxPv = p(4); % need to fix
-% maxPpv = 0.04; maxPv = 0.1;
-    
+
+p_ = sdpvar(6*(N+1),1);
+p = p_(1:6);
+P = [p(1)   0    0  p(3)   0    0;
+       0  p(1)   0    0  p(3)   0;
+       0    0  p(2)   0    0  p(4);
+     p(3)   0    0  p(5)   0    0;
+       0  p(3)   0    0  p(5)   0;
+       0    0  p(4)   0    0  p(6)];
+
+maxPpv = p(4); maxPv = p(6); % need to fix
+
+p = p_(7:12);
+Pnext = [p(1)   0    0  p(3)   0    0;
+           0  p(1)   0    0  p(3)   0;
+           0    0  p(2)   0    0  p(4);
+         p(3)   0    0  p(5)   0    0;
+           0  p(3)   0    0  p(5)   0;
+           0    0  p(4)   0    0  p(6)];
+
 V = e'*P*e;
 Vdot = e'*(A'*P + P*A)*e ...
-       + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
+       + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar +  9.8 + max_ar) ...
+       + e'*(Pnext - P)*e/dt;
    
 constraints = [];
 vars = rho;
 cost = 0;
-pVars = p;
+% pVars = p;
 % pVars = [];
 sVars = [];
 sOut = [];
@@ -78,7 +85,7 @@ vars = [vars;coeff2;coeff4;coeff5;coeff6;coeff7];
 sVars = [sVars;S(:)];
 sOut = [sOut S(:)];
 
-for k=2:N
+for k=2:N-1
     [L1,coeff1] = polynomial([e;epbar;edbar],monomialOrder);
     [L3,coeff3] = polynomial(e,monomialOrder);
 
@@ -91,14 +98,32 @@ for k=2:N
 
     L1 = replace(L1,coeff1,value(Lc1(:,k)));
     L3 = replace(L3,coeff3,value(Lc3(:,k)));
-        
+
+%     p = sdpvar(5,1);
+    p = p_(6*(k-1)+1:6*k);
+    P = [p(1)   0    0  p(3)   0    0;
+           0  p(1)   0    0  p(3)   0;
+           0    0  p(2)   0    0  p(4);
+         p(3)   0    0  p(5)   0    0;
+           0  p(3)   0    0  p(5)   0;
+           0    0  p(4)   0    0  p(6)];
+
+    p = p_(6*k+1:6*(k+1));
+    Pnext = [p(1)   0    0  p(3)   0    0;
+               0  p(1)   0    0  p(3)   0;
+               0    0  p(2)   0    0  p(4);
+             p(3)   0    0  p(5)   0    0;
+               0  p(3)   0    0  p(5)   0;
+               0    0  p(4)   0    0  p(6)];
     S = sdpvar(6,6);
     sVars = [sVars;coeff4;coeff5;coeff6;coeff7;S(:)];
     sOut = [sOut S(:)];
-    
+%     pVars = [pVars;p];
+        
     V = e'*P*e;
     Vdot = e'*(A'*P + P*A)*e ...
-           + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
+           + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 9.8 + max_ar) ...
+           + e'*(Pnext - P)*e / dt;
     
     c1 = sos(rhodot(k) - Vdot ...
              - L1*(rho(k) - V) ...
@@ -115,12 +140,14 @@ for k=2:N
     cost = cost + geomean(S);
 end
 
-sol = solvesos(constraints,-cost,[],[vars;pVars;sVars]);
+% sol = solvesos(constraints,-cost,[],[vars;pVars;sVars]);
+sol = solvesos(constraints,-cost,[],[vars;p_;sVars]);
 solProblem = sol.problem;
 
 rho = value(rho);
 sOut = value(sOut);
-p = value(p);
+% p = value(p);
+p_ = value(p_);
 % p = 0;
 
 end

@@ -6,7 +6,8 @@ N = length(rho)-1;
 coeff1_ = [];
 coeff3_ = [];
 S_ = [];
-Er = 0.08;
+Er = 0.1;
+max_ar = 0;
 
 maxPpv = max(max(P(1:3,4:6)));
 % maxPp = max(max(P(1:3,1:3)));
@@ -34,7 +35,7 @@ parfor i=1:N
        
        V = e'*P*e;
        Vdot = e'*Q*e ...
-              + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
+              + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 9.8 + max_ar);
    
        c1 = sos(rhodot(i) - Vdot ...
                 - L1*(rho(i) - V) ...
@@ -71,9 +72,6 @@ parfor i=1:N
        epep = e(1:3)'*e(1:3);
        eded = e(4:6)'*e(4:6);
        
-%        [L1,coeff1] = polynomial(e,monomialOrder);
-%        [L3,coeff3] = polynomial(e,monomialOrder);
-
        [L1,coeff1] = polynomial([e;epbar;edbar],monomialOrder);
        [L3,coeff3] = polynomial(e,monomialOrder);
 
@@ -84,7 +82,7 @@ parfor i=1:N
        
        V = e'*P*e;
        Vdot = e'*Q*e ...
-              + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 18);
+              + Er*(maxPpv*epbar+maxPv*edbar)*(maxKp*epbar+maxKd*edbar + 9.8 + max_ar);
    
        c1 = sos(rhodot(i) - Vdot ...
                 - L1*(rho(i) - V) ...
