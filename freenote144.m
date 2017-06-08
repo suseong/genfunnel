@@ -8,8 +8,8 @@ e = sdpvar(6,1);
 dt = 0.01;
 
 initRegion = diag(1./[0.1 0.1 0.1 0.2 0.2 0.2].^2);
-Er = 0.1;
-max_ar = 0;
+Er = 0.0;
+ar = 15;
 
 Kp = diag([10 10 15]);
 Kd = diag([4 4 6]);
@@ -18,20 +18,23 @@ A = [zeros(3,3) eye(3); -Kp -Kd];
 P = lyap(A',-0.1*eye(6));
 P = P/P(1,1);
 
-N = 50;
+N = 10;
 
 %%
 rho = sdpvar(1,1);
 rhodot = sdpvar(1,1);
-Pe = sdpvar(1,1);
-Ke = sdpvar(1,1);
 epbar = sdpvar(1,1);
-edvar = sdpvar(1,1);
+edbar = sdpvar(1,1);
 Ppv = sdpvar(1,1);
 Pv = sdpvar(1,1);
+x = sdpvar(1,1);
+
+maxKp = max(max(Kp));
+maxKd = max(max(Kd));
 
 V = e'*P*e;
-Vdot = e'*(P*A+A'*P)*e + Er*Pe*(Ke + max_ar);
+Vdot = e'*(P*A+A'*P)*e ...
+       + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar);
 
 monomialOrder = 2;
 [L_init,coeff_init] = polynomial(e,monomialOrder);
@@ -47,18 +50,46 @@ rhoTemp = rhoInit;
 rhoCont = rhoInit;
 
 for i=1:N
-    [L1,coeff1] = polynomial([e;Pe;Ke],monomialOrder);
-    [L_Pe,coeff_Pe] = polynomial([e;Pe;Ke],3);
-    [L_Ke,coeff_Ke] = polynomial([e;Pe;Ke],3);
+    [Lrho,Crho] =       polynomial([e;epbar;edbar ],monomialOrder);
+    [Lep,Cep] =         polynomial([e;epbar;edbar ],monomialOrder);
+    [Led,Ced] =         polynomial([e;epbar;edbar ],monomialOrder);
+    [Lepsign,Cepsign] = polynomial([e;epbar;edbar ],monomialOrder);
+    [Ledsign,Cedsign] = polynomial([e;epbar;edbar ],monomialOrder);
+    [LPpv1,CPpv1] =     polynomial(x,monomialOrder);
+    [LPpv2,CPpv2] =     polynomial(x,monomialOrder);
+    [LPv1,CPv1] =       polynomial(x,monomialOrder);
+    [LPv2,CPv2] =       polynomial(x,monomialOrder);
     
-    vars = [coeff1;coeff_Pe;coeff_Ke];
+    vars = [Crho;Cep;Ced;Cepsign;Cedsign];
+    vars = [vars;CPpv1;CPpv2;CPv1;CPv2];
+    vars = [vars;rhodot;Ppv;Pv];
     
     c1 = sos(rhodot - Vdot ...
-             - L1*(rhoTemp - V) ...
-             - L_Pe*(Pe - P(1:3,4:6)*e(1:3) - P(4:6,4:6)*e(4:6)) ...              
-             - L_Ke*(Ke - Kp*e(1:3) - Kd*e(4:6)));
+             - Lrho*(rhoTemp - V) ...
+             - Lep*(epbar^2 - e(1:3)'*e(1:3)) ...
+             - Led*(edbar^2 - e(4:6)'*e(4:6)) ...
+             - Lepsign*(epbar) ...
+             - Ledsign*(edbar) ...
+             );
+    c2 = sos(Lepsign);
+    c3 = sos(Ledsign);
+
+    c4 = sos(Ppv - P(1,4) - LPpv1);
+    c5 = sos(Ppv + P(1,4) - LPpv1);
+    c6 = sos(Ppv - P(3,6) - LPpv2);
+    c7 = sos(Ppv + P(3,6) - LPpv2);
+    c8 = sos(LPpv1);
+    c9 = sos(LPpv2);
     
-    sol = solvesos(c1,rhodot,[],vars);
+    c10 = sos(Pv - P(4,4) - LPv1);
+    c11 = sos(Pv + P(4,4) - LPv1);
+    c12 = sos(Pv - P(6,6) - LPv2);
+    c13 = sos(Pv + P(6,6) - LPv2);
+    c14 = sos(LPv1);
+    c15 = sos(LPv2);
+    
+    constraints = [c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15];
+    sol = solvesos(constraints,rhodot,[],vars);
     
     rhoTemp = rhoTemp + value(rhodot)*dt;
     rhoCont(i+1) = rhoTemp;
@@ -77,29 +108,11 @@ for k = 1:N+1
     Q_temp{k} = P*A + A'*P;
 end
 
-[coeffL1,coeffL3,coeffPe,S_] = findL(dt,P_temp,Q_temp,rhoCont,rhodot,Kp,Kd);
-
-rho__ = [];
+%%
+[coeffL1,coeffL3,S_] = findL(dt,P_temp,Q_temp,rhoCont,rhodot,Kp,Kd);
 
 %%
-[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,coeffPe,initRegion,Kp,Kd);
-
-% P_temp = []; Q_temp = [];
-% for k = 1:N-2
-%    p_temp = p(6*(k-1)+1:6*k);
-%    P_temp{k} = [p_temp(1)        0         0  p_temp(3)        0         0;
-%                        0  p_temp(1)        0         0  p_temp(3)        0;
-%                        0         0  p_temp(2)        0         0  p_temp(4);
-%                 p_temp(3)        0         0  p_temp(5)        0         0;
-%                        0  p_temp(3)        0         0  p_temp(5)        0;
-%                        0         0  p_temp(4)        0         0  p_temp(6)];
-%                    
-%    Q_temp{k} = P_temp{k}*A +A'*P_temp{k};
-% end
-% 
-% rhodot = diff(rho(1:end-2))/dt;
-% 
-% [coeffL1,coeffL3,S_] = findL(dt,P_temp,Q_temp,rho(1:end-2),rhodot,Kp,Kd);
+[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd);
 
 %%
 ang = -pi:0.2:pi;

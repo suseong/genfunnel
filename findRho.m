@@ -1,19 +1,36 @@
-function [rho,sOut,p_,solProblem] = findRho(dt,A,Lc1,Lc3,LcPe,initRegion,Kp,Kd)
+function [rho,sOut,p_,solProblem] = findRho(dt,A,Crho1_,Crho3_,initRegion,Kp,Kd)
 
 checkDependency('yalmip');
-monomialOrder = 3;
-Er = 0.1;
-max_ar = 0;
+monomialOrder = 2;
+Er = 0.0;
+ar = 15;
+maxKp = max(max(Kp));
+maxKd = max(max(Kd));
 
-N = size(Lc1,2)-1;
+N = size(Crho1_,2)-1;
+
 rho = sdpvar(N+1,1);
-rhodot = sdpvar(N,1);
-e = sdpvar(6,1);
-Pe = sdpvar(1,1);
-Ke = sdpvar(1,1);
-
 p_ = sdpvar(6*(N+1),1);
-p = p_(1:6);
+
+e = sdpvar(6,1);
+epbar = sdpvar(1,1);
+edbar = sdpvar(1,1);
+x = sdpvar(1,1);
+
+constraints = [];
+vars = [rho;p_];
+cost = 0;
+sVars = [];
+sOut = [];
+
+%%
+k=1;
+
+Ppv = sdpvar(1,1);
+Pv = sdpvar(1,1);
+S = sdpvar(6,6);
+
+p = p_(6*(k-1)+1:6*k);
 P = [p(1)   0    0  p(3)   0    0;
        0  p(1)   0    0  p(3)   0;
        0    0  p(2)   0    0  p(4);
@@ -21,9 +38,7 @@ P = [p(1)   0    0  p(3)   0    0;
        0  p(3)   0    0  p(5)   0;
        0    0  p(4)   0    0  p(6)];
 
-k=1;
-
-p = p_(7:12);
+p = p_(6*k+1:6*(k+1));
 Pnext = [p(1)   0    0  p(3)   0    0;
            0  p(1)   0    0  p(3)   0;
            0    0  p(2)   0    0  p(4);
@@ -32,57 +47,72 @@ Pnext = [p(1)   0    0  p(3)   0    0;
            0    0  p(4)   0    0  p(6)];
 
 V = e'*P*e;
-Vdot = e'*(A'*P + P*A)*e ...
-       + Er*Pe*(Ke + max_ar) ...
-       + e'*(Pnext - P)*e/dt;
+Vdot = e'*(P*A+A'*P)*e ...
+       + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar) ...
+       + e'*(Pnext - P)*e / dt;
+rhodot = (rho(k+1) - rho(k))/dt;
+
+[Lrho1,Crho1] =     polynomial([e;epbar;edbar],monomialOrder);
+[Lrho2,Crho2] =     polynomial([e;epbar;edbar],monomialOrder);       
+[Lrho3,Crho3] =     polynomial([e;epbar;edbar],monomialOrder);       
+[Lep,Cep] =         polynomial([e;epbar;edbar],monomialOrder);
+[Led,Ced] =         polynomial([e;epbar;edbar],monomialOrder);
+[Lepsign,Cepsign] = polynomial([e;epbar;edbar],monomialOrder);
+[Ledsign,Cedsign] = polynomial([e;epbar;edbar],monomialOrder);
+[LPpv1,CPpv1] =     polynomial(x,monomialOrder);
+[LPpv2,CPpv2] =     polynomial(x,monomialOrder);
+[LPv1,CPv1] =       polynomial(x,monomialOrder);
+[LPv2,CPv2] =       polynomial(x,monomialOrder);
+
+Lrho1 = replace(Lrho1,Crho1,value(Crho1_(:,k)));
+Lrho3 = replace(Lrho3,Crho3,value(Crho3_(:,k)));
+
+c1 = sos(rhodot - Vdot ...
+         - Lrho1*(rho - V) ...
+         - Lep*(epbar^2 - e(1:3)'*e(1:3)) ...
+         - Led*(edbar^2 - e(4:6)'*e(4:6)) ...
+         - Lepsign*(epbar) ...
+         - Ledsign*(edbar) ...
+         );
+c2 = sos(Lepsign);
+c3 = sos(Ledsign);
+
+c4 = sos(rho(k) - V ...
+         -Lrho2*(1-e'*initRegion*e));
+c5 = sos(Lrho2);
+
+c6 = sos(1 - e'*S*e ...
+         -Lrho3*(rho(k) - V));
+     
+c7 = S >= 0;
+
+c8 = sos(Ppv - P(1,4) - LPpv1);
+c9 = sos(Ppv + P(1,4) - LPpv1);
+c10 = sos(Ppv - P(3,6) - LPpv2);
+c11 = sos(Ppv + P(3,6) - LPpv2);
+c12 = sos(LPpv1);
+c13 = sos(LPpv2);
+
+c14 = sos(Pv - P(4,4) - LPv1);
+c15 = sos(Pv + P(4,4) - LPv1);
+c16 = sos(Pv - P(6,6) - LPv2);
+c17 = sos(Pv + P(6,6) - LPv2);
+c18 = sos(LPv1);
+c19 = sos(LPv2);
    
-constraints = [];
-vars = rho;
-cost = 0;
-sVars = [];
-sOut = [];
+constraints = [constraints c1 c2 c3 c4 c5 c6 c7 c8 c9 ...
+               c10 c11 c12 c13 c14 c15 c16 c17 c18 c19];
 
-S = sdpvar(6,6);
-
-[L1,coeff1] = polynomial([e;Pe;Ke],monomialOrder+1);
-[L2,coeff2] = polynomial([e;Pe;Ke],monomialOrder+1);
-[L3,coeff3] = polynomial([e;Pe;Ke],monomialOrder+1);
-[LPe,coeffPe] = polynomial([e;Pe;Ke],3+1);
-[LKe,coeffKe] = polynomial([e;Pe;Ke],3+1);
-
-rhodot(k) = (rho(k+1) - rho(k))/dt;
-
-L1 = replace(L1,coeff1,value(Lc1(:,k)));
-L3 = replace(L3,coeff3,value(Lc3(:,k)));
-LPe = replace(LPe,coeffPe,value(LcPe(:,k)));
-
-c1 = sos(rhodot(k) - Vdot ...
-         - L1*(rho(k) - V) ...
-         - LPe*(Pe - P(1:3,4:6)*e(1:3) - P(4:6,4:6)*e(4:6)) ...         
-         - LKe*(Ke - Kp*e(1:3) - Kd*e(4:6)));
-c2 = sos(rho(k) - V ...
-         - L2*(1-e'*initRegion*e));
-% c3 = sos(L2);
-c4 = sos(1 - e'*S*e ...
-         - L3*(rho(k) - V));
-c5 = S >= 0;
-
-constraints = [constraints c1 c2 c4 c5];
-cost = cost + geomean(S);
-
-vars = [vars;coeff2;coeffKe]; 
+vars = [vars;Ppv;Pv;Crho2;Cep;Ced;Cepsign;Cedsign;CPpv1;CPpv2;CPv1;CPv2]; 
 sVars = [sVars;S(:)];
 sOut = [sOut S(:)];
 
-for k=2:N-1
-    [L1,coeff1] = polynomial([e;Pe;Ke],monomialOrder+1);
-    [L3,coeff3] = polynomial([e;Pe;Ke],monomialOrder+1);
-    [LPe,coeffPe] = polynomial([e;Pe;Ke],3+1);
-    [LKe,coeffKe] = polynomial([e;Pe;Ke],3+1);
+cost = cost + geomean(S);
 
-    L1 = replace(L1,coeff1,value(Lc1(:,k)));
-    L3 = replace(L3,coeff3,value(Lc3(:,k)));
-    LPe = replace(LPe,coeffPe,value(LcPe(:,k)));
+for k=2:N-1
+    Ppv = sdpvar(1,1);
+    Pv = sdpvar(1,1);
+    S = sdpvar(6,6);
 
     p = p_(6*(k-1)+1:6*k);
     P = [p(1)   0    0  p(3)   0    0;
@@ -99,31 +129,67 @@ for k=2:N-1
              p(3)   0    0  p(5)   0    0;
                0  p(3)   0    0  p(5)   0;
                0    0  p(4)   0    0  p(6)];
-    S = sdpvar(6,6);
+
     V = e'*P*e;
-    Vdot = e'*(A'*P + P*A)*e ...
-           + Er*Pe*(Ke + max_ar) ...
+    Vdot = e'*(P*A+A'*P)*e ...
+           + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar) ...
            + e'*(Pnext - P)*e / dt;
-       
-    rhodot(k) = (rho(k+1) - rho(k))/dt;   
-    
-    c1 = sos(rhodot(k) - Vdot ...
-             - L1*(rho(k) - V) ...
-             - LPe*(Pe - P(1:3,4:6)*e(1:3) - P(4:6,4:6)*e(4:6)) ...             
-             - LKe*(Ke - Kp*e(1:3) - Kd*e(4:6)));
-    c4 = sos(1 - e'*S*e ...
-             - L3*(rho(k) - V));
+    rhodot = (rho(k+1) - rho(k))/dt;
+   
+    [Lrho1,Crho1] =     polynomial([e;epbar;edbar],monomialOrder);
+    [Lrho3,Crho3] =     polynomial([e;epbar;edbar],monomialOrder);       
+    [Lep,Cep] =         polynomial([e;epbar;edbar],monomialOrder);
+    [Led,Ced] =         polynomial([e;epbar;edbar],monomialOrder);
+    [Lepsign,Cepsign] = polynomial([e;epbar;edbar],monomialOrder);
+    [Ledsign,Cedsign] = polynomial([e;epbar;edbar],monomialOrder);
+    [LPpv1,CPpv1] =     polynomial(x,monomialOrder);
+    [LPpv2,CPpv2] =     polynomial(x,monomialOrder);
+    [LPv1,CPv1] =       polynomial(x,monomialOrder);
+    [LPv2,CPv2] =       polynomial(x,monomialOrder);
+
+    Lrho1 = replace(Lrho1,Crho1,value(Crho1_(:,k)));
+    Lrho3 = replace(Lrho3,Crho3,value(Crho3_(:,k)));
+
+    c1 = sos(rhodot - Vdot ...
+             - Lrho1*(rho - V) ...
+             - Lep*(epbar^2 - e(1:3)'*e(1:3)) ...
+             - Led*(edbar^2 - e(4:6)'*e(4:6)) ...
+             - Lepsign*(epbar) ...
+             - Ledsign*(edbar) ...
+             );
+    c2 = sos(Lepsign);
+    c3 = sos(Ledsign);
+
+    c6 = sos(1 - e'*S*e ...
+             -Lrho3*(rho(k) - V));
+
     c7 = S >= 0;
 
-    constraints = [constraints c1 c4 c7];
-    vars = [vars;coeffKe];
+    c8 = sos(Ppv - P(1,4) - LPpv1);
+    c9 = sos(Ppv + P(1,4) - LPpv1);
+    c10 = sos(Ppv - P(3,6) - LPpv2);
+    c11 = sos(Ppv + P(3,6) - LPpv2);
+    c12 = sos(LPpv1);
+    c13 = sos(LPpv2);
+
+    c14 = sos(Pv - P(4,4) - LPv1);
+    c15 = sos(Pv + P(4,4) - LPv1);
+    c16 = sos(Pv - P(6,6) - LPv2);
+    c17 = sos(Pv + P(6,6) - LPv2);
+    c18 = sos(LPv1);
+    c19 = sos(LPv2);
+   
+    constraints = [constraints c1 c2 c3 c6 c7 c8 c9 ...
+                   c10 c11 c12 c13 c14 c15 c16 c17 c18 c19];
+
+    vars = [vars;Ppv;Pv;Crho2;Cep;Ced;Cepsign;Cedsign;CPpv1;CPpv2;CPv1;CPv2]; 
     sVars = [sVars;S(:)];
     sOut = [sOut S(:)];
-    
+
     cost = cost + geomean(S);
 end
 
-sol = solvesos(constraints,-cost,[],[vars;p_;sVars]);
+sol = solvesos(constraints,-cost,[],[vars;sVars]);
 solProblem = sol.problem;
 
 rho = value(rho);
