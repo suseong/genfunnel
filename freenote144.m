@@ -7,7 +7,7 @@ checkDependency('yalmip');
 e = sdpvar(6,1);
 dt = 0.01;
 
-initRegion = diag(1./[0.1 0.1 0.2 0.2 0.2 0.4].^2);
+initRegion = diag(1./[0.1 0.1 0.1 0.2 0.2 0.2].^2);
 Er = 0.1;
 max_ar = 0;
 
@@ -18,16 +18,20 @@ A = [zeros(3,3) eye(3); -Kp -Kd];
 P = lyap(A',-0.1*eye(6));
 P = P/P(1,1);
 
-N = 5;
+N = 50;
 
 %%
 rho = sdpvar(1,1);
 rhodot = sdpvar(1,1);
-% Pe = sdpvar(1,1);
+Pe = sdpvar(1,1);
 Ke = sdpvar(1,1);
+epbar = sdpvar(1,1);
+edvar = sdpvar(1,1);
+Ppv = sdpvar(1,1);
+Pv = sdpvar(1,1);
 
 V = e'*P*e;
-Vdot = e'*(P*A+A'*P)*e + Er*1*(Ke + max_ar);
+Vdot = e'*(P*A+A'*P)*e + Er*Pe*(Ke + max_ar);
 
 monomialOrder = 2;
 [L_init,coeff_init] = polynomial(e,monomialOrder);
@@ -43,14 +47,15 @@ rhoTemp = rhoInit;
 rhoCont = rhoInit;
 
 for i=1:N
-    [L1,coeff1] = polynomial([e;Ke],monomialOrder);
-%     [L_Pe,coeff_Pe] = polynomial([e;Pe;Ke],monomialOrder);
-    [L_Ke,coeff_Ke] = polynomial([e;Ke],monomialOrder);
+    [L1,coeff1] = polynomial([e;Pe;Ke],monomialOrder);
+    [L_Pe,coeff_Pe] = polynomial([e;Pe;Ke],3);
+    [L_Ke,coeff_Ke] = polynomial([e;Pe;Ke],3);
     
-    vars = [coeff1;coeff_Ke];
+    vars = [coeff1;coeff_Pe;coeff_Ke];
     
     c1 = sos(rhodot - Vdot ...
              - L1*(rhoTemp - V) ...
+             - L_Pe*(Pe - P(1:3,4:6)*e(1:3) - P(4:6,4:6)*e(4:6)) ...              
              - L_Ke*(Ke - Kp*e(1:3) - Kd*e(4:6)));
     
     sol = solvesos(c1,rhodot,[],vars);
@@ -59,7 +64,6 @@ for i=1:N
     rhoCont(i+1) = rhoTemp;
 end
 
-%              - L_Pe*(Pe - P(1:3,4:6)*e(1:3) - P(4:6,4:6)*e(4:6)) ... 
 
 %%
 ts = linspace(0,dt*(N-1),N);
@@ -99,12 +103,12 @@ rho__ = [];
 
 %%
 ang = -pi:0.2:pi;
-for jj = 1:3
+for jj = 1:N-2
     figure(101);clf;
     hold on
-%     P = reshape(double(sVars(:,jj)),6,6);
-    P = reshape(double(S_(:,jj)),6,6);
-    kk = 3;
+    P = reshape(double(sVars(:,jj)),6,6);
+%     P = reshape(double(S_(:,jj)),6,6);
+    kk = 1;
     p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)];
     invp1 = inv(sqrtm(p1));
     p2 = [initRegion(kk,kk) initRegion(kk,kk+3);initRegion(kk+3,kk) initRegion(kk+3,kk+3)];
