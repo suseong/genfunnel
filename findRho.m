@@ -1,9 +1,9 @@
-function [rho,sOut,p_,solProblem] = findRho(dt,A,Crho1_,Crho3_,initRegion,Kp,Kd)
+function [rho,sOut,p_,solProblem] = findRho(dt,A,Crho1_,Crho3_,initRegion,Kp,Kd,Er,ar)
 
 checkDependency('yalmip');
 monomialOrder = 2;
-Er = 0.0;
-ar = 15;
+% Er = 0.0;
+% ar = 15;
 maxKp = max(max(Kp));
 maxKd = max(max(Kd));
 

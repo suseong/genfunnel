@@ -7,9 +7,9 @@ checkDependency('yalmip');
 e = sdpvar(6,1);
 dt = 0.01;
 
-initRegion = diag(1./[0.1 0.1 0.1 0.2 0.2 0.2].^2);
-Er = 0.0;
-ar = 15;
+initRegion = diag(1./[0.4 0.4 0.2 0.6 0.6 0.4].^2);
+Er = 0.01;
+ar = 20;
 
 Kp = diag([10 10 15]);
 Kd = diag([4 4 6]);
@@ -18,7 +18,7 @@ A = [zeros(3,3) eye(3); -Kp -Kd];
 P = lyap(A',-0.1*eye(6));
 P = P/P(1,1);
 
-N = 40;
+N = 100;
 
 %%
 rho = sdpvar(1,1);
@@ -98,19 +98,19 @@ for k = 1:N+1
 end
 
 %%
-[coeffL1,coeffL3,S_] = findL(dt,P_temp,Q_temp,rhoCont,rhodot,Kp,Kd);
+[coeffL1,coeffL3,S_] = findL(dt,P_temp,Q_temp,rhoCont,rhodot,Kp,Kd,Er,ar);
 
 %%
-[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd);
+[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar);
 
 %%
 ang = -pi:0.2:pi;
-for jj = 1:N-1
+for jj = 1:N-2
     figure(101);clf;
     hold on
     P = reshape(double(sVars(:,jj)),6,6);
 %     P = reshape(double(S_(:,jj)),6,6);
-    kk = 2;
+    kk = 3;
     p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)];
     invp1 = inv(sqrtm(p1));
     p2 = [initRegion(kk,kk) initRegion(kk,kk+3);initRegion(kk+3,kk) initRegion(kk+3,kk+3)];
@@ -121,7 +121,7 @@ for k=1:length(ang)
    yy = invp2*[cos(ang(k));sin(ang(k))];
    my_phase(yy,jj);
 end
-   axis([-0.5 0.5 -0.5 0.5]);
+   axis([-0.5 0.5 -1.5 1.5]);
    axis equal
    pause(0.1);
 end

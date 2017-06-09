@@ -1,4 +1,4 @@
-function [coeff1_,coeff3_,S_] = findL(dt,P,Q,rho,rhodot,Kp,Kd)
+function [coeff1_,coeff3_,S_] = findL(dt,P,Q,rho,rhodot,Kp,Kd,Er,ar)
 
 checkDependency('yalmip');
 monomialOrder = 2;
@@ -6,8 +6,8 @@ N = length(rho)-1;
 coeff1_ = [];
 coeff3_ = [];
 S_ = [];
-Er = 0.0;
-ar = 15;
+% Er = 0.01;
+% ar = 15;
 maxKp = max(max(Kp));
 maxKd = max(max(Kd));
 
