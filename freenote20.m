@@ -2,6 +2,7 @@ clear
 close all
 clc
 
+%%
 p = quadRPG();
 
 wypt = [   0    0    0   0   0   0   0   0   0;
@@ -19,14 +20,14 @@ inputBuff = [];
 trajNum = 7;
 
 %%
-for k=6:trajNum
-% for k=1:1
+% for k=6:trajNum
+for k=1:1
 
 tf = 1;
 delT = 0.05;
 
 xs = wypt(k,:);xf = wypt(k+1,:);
-[xtraj,utraj] = refTraj2(xs,xf,tf,delT,p);
+xtraj = refTraj2(xs,xf,tf,delT,p);
 
 % if k > 6
 %    desStateTimeBuff = [desStateTimeBuff xtraj.getBreaks+desStateTimeBuff(end)];

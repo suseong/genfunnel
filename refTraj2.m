@@ -1,4 +1,4 @@
-function [state_euler_traj,input_traj] = refTraj1(xs,xf,tf,delT,plant)
+function [state_euler_traj,input_traj] = refTraj2(xs,xf,tf,delT)
 
 ps = xs(1:3);
 vs = xs(4:6);
@@ -58,7 +58,7 @@ tt = 0:delT:tf;
 
 for i=1:length(tt)
     temp = stateTraj.dderiv(tt(i));
-    T_ =  temp(1:3) - [0;0;plant.g];
+    T_ =  temp(1:3) - [0;0;-9.8];
     T_mag = 1.0*norm(T_);
     zb = T_ / T_mag;
 
@@ -74,7 +74,7 @@ for i=1:length(tt)
     phi = rpy(1);theta = rpy(2);psi = rpy(3);
     Euler(:,i) = [phi;theta;psi];
     p = 0;q = 0;r = 0;
-    input(:,i) = [T_mag*plant.m;p;q;r];
+    input(:,i) = [T_mag;p;q;r];
 end
 
 for i=1:length(tt)-1
@@ -114,8 +114,8 @@ for i=1:length(tt)-1
 end
 
 state_euler_traj = PPTrajectory(mkpp(tt,state_euler_coefs,9));
-state_euler_traj = state_euler_traj.setOutputFrame(plant.getStateFrame);
+% state_euler_traj = state_euler_traj.setOutputFrame(plant.getStateFrame);
 input_traj = PPTrajectory(input_pp);
-input_traj = input_traj.setOutputFrame(plant.getInputFrame);
+% input_traj = input_traj.setOutputFrame(plant.getInputFrame);
 
 end
