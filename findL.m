@@ -43,7 +43,7 @@ parfor i=1:N
        c4 = sos(1 - e'*S*e ...
                 - Lrho2*(rho(i) - V) ...
                 );
-%        c5 = sos(Lrho2);
+       c5 = sos(Lrho2);
        
        c6 = sos(Ppv - P{i}(1,4));
        c7 = sos(Ppv + P{i}(1,4));
@@ -57,7 +57,7 @@ parfor i=1:N
        
        c14 = S >= 0;       
        
-       constraints = [c1 c2 c3 c4 c6 c7 c8 c9 c10 ...
+       constraints = [c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 ...
                       c11 c12 c13 c14];
 
        vars = [Crho1;Crho2;Cep;Ced;Cepsign;Cedsign];

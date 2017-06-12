@@ -5,9 +5,9 @@ clc
 ang = -pi:0.1:pi+0.1;
 
 figure(1);clf;
-for jj = 1:29
+for jj = 10:29
     hold on
-    P = reshape(double(shells{1}(:,jj*5)),6,6);
+    P = reshape(sVars(:,jj*5),6,6);
     kk = 3;
     p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)];
     invp1 = inv(sqrtm(p1));

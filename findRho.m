@@ -51,7 +51,7 @@ Vdot = e'*(P*A+A'*P)*e ...
 rhodot = (rho(k+1) - rho(k))/dt;
 
 [Lrho1,Crho1] =     polynomial([e;epbar;edbar],monomialOrder);
-[Lrho2,Crho2] =     polynomial(e,monomialOrder+1);       
+[Lrho2,Crho2] =     polynomial(e,monomialOrder);       
 [Lrho3,Crho3] =     polynomial(e,monomialOrder);       
 [Lep,Cep] =         polynomial([e;epbar;edbar],monomialOrder);
 [Led,Ced] =         polynomial([e;epbar;edbar],monomialOrder);

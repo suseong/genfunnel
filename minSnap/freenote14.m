@@ -86,6 +86,9 @@ figure(3)
 plot([Ta Tb Tc Td],acc_norm);
 
 %%
+load('shells_5deg.mat')
+
+%%
 funnel = [];
 validFinal = 140;
 funnel{1} = reshape(double(shells{1}(:,validFinal)),6,6);
@@ -123,6 +126,28 @@ for k = 2 : length([Ta Tb Tc Td])
 end
 
 %%
+ang = -pi:0.1:pi+0.1;
+
+xx = []; yy = []; zz = [];
+xx_ = []; yy_ = []; zz_ = [];
+
+for acc = 1:length(shells)
+    for num = 1:29
+        P = reshape(double(shells{acc}(:,num*5)),6,6);
+        invP = inv(P);      
+        for j=1:length(ang)
+            for k=1:length(ang)
+                a = [sin(ang(j))*sin(ang(k));sin(ang(j))*cos(ang(k));cos(ang(j));zeros(3,1)];
+                lambda = sqrt(a'*invP*a);
+                temp = 1/lambda*invP*a;
+                xx{acc,num}(j,k) = temp(1); yy{acc,num}(j,k) = temp(2); zz{acc,num}(j,k) = temp(3);
+                xx_{acc,num}(j,k) = -temp(1); yy_{acc,num}(j,k) = -temp(2); zz_{acc,num}(j,k) = -temp(3);
+            end
+        end
+    end
+end
+
+%%
 px = [p1_x p2_x p3_x p4_x];
 py = [p1_y p2_y p3_y p4_y];
 
@@ -134,7 +159,7 @@ for k = 1:length([Ta Tb Tc Td])
     hold on
     axis equal
 end
-
+view(0,90)
 
 
 
