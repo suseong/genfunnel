@@ -6,8 +6,7 @@ N = length(rho)-1;
 coeff1_ = [];
 coeff3_ = [];
 S_ = [];
-% Er = 0.01;
-% ar = 15;
+
 maxKp = max(max(Kp));
 maxKd = max(max(Kd));
 
@@ -62,7 +61,7 @@ parfor i=1:N
 
        vars = [Crho1;Crho2;Cep;Ced;Cepsign;Cedsign];
        vars = [vars;Ppv;Pv;S(:)];           
-           
+       
        sol = solvesos(constraints,-geomean(S),[],vars);
          
        if sol.problem == 0

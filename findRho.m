@@ -2,15 +2,14 @@ function [rho,sOut,p_,solProblem] = findRho(dt,A,Crho1_,Crho3_,initRegion,Kp,Kd,
 
 checkDependency('yalmip');
 monomialOrder = 2;
-% Er = 0.0;
-% ar = 15;
+
 maxKp = max(max(Kp));
 maxKd = max(max(Kd));
 
 N = size(Crho1_,2);
 
-rho = sdpvar(N+1,1);
-p_ = sdpvar(6*(N+1),1);
+rho = sdpvar(N,1);
+p_ = sdpvar(6*N,1);
 
 e = sdpvar(6,1);
 epbar = sdpvar(1,1);
@@ -111,21 +110,27 @@ for k=2:N
          p(3)   0    0  p(5)   0    0;
            0  p(3)   0    0  p(5)   0;
            0    0  p(4)   0    0  p(6)];
-
-    p = p_(6*k+1:6*(k+1));
-    Pnext = [p(1)   0    0  p(3)   0    0;
-               0  p(1)   0    0  p(3)   0;
-               0    0  p(2)   0    0  p(4);
-             p(3)   0    0  p(5)   0    0;
-               0  p(3)   0    0  p(5)   0;
-               0    0  p(4)   0    0  p(6)];
-
     V = e'*P*e;
-    Vdot = e'*(P*A+A'*P)*e ...
-           + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar) ...
-           + e'*(Pnext - P)*e / dt;
-    rhodot = (rho(k+1) - rho(k))/dt;
-   
+    
+    if k ~= N
+        p = p_(6*k+1:6*(k+1));
+        Pnext = [p(1)   0    0  p(3)   0    0;
+                   0  p(1)   0    0  p(3)   0;
+                   0    0  p(2)   0    0  p(4);
+                 p(3)   0    0  p(5)   0    0;
+                   0  p(3)   0    0  p(5)   0;
+                   0    0  p(4)   0    0  p(6)];
+
+        Vdot = e'*(P*A+A'*P)*e ...
+            + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar) ...
+            + e'*(Pnext - P)*e / dt;
+        rhodot = (rho(k+1) - rho(k))/dt;
+    else
+        Vdot = e'*(P*A+A'*P)*e ...
+            + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar);
+        rhodot = 0;        
+    end
+    
     [Lrho1,Crho1] =     polynomial([e;epbar;edbar],monomialOrder);
     [Lrho3,Crho3] =     polynomial(e,monomialOrder);       
     [Lep,Cep] =         polynomial([e;epbar;edbar],monomialOrder);
@@ -164,7 +169,7 @@ for k=2:N
     constraints = [constraints c1 c2 c3 c6 c7 ...
                    c8 c9 c10 c11 c12 c13 c14 c15];
 
-    vars = [vars;Ppv;Pv;Crho2;Cep;Ced;Cepsign;Cedsign]; 
+    vars = [vars;Ppv;Pv;Cep;Ced;Cepsign;Cedsign]; 
     sVars = [sVars;S(:)];
     sOut = [sOut S(:)];
 

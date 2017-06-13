@@ -5,24 +5,24 @@ clc
 checkDependency('yalmip');
 
 e = sdpvar(6,1);
-dt = 0.0001;
+dt = 0.01;
 
-% initRegion = diag(1./[0.3 0.3 0.2 0.4 0.4 0.3].^2);
-initRegion = diag(1./[0.05 0.05 0.1 0.1 0.1 0.15].^2);
+initRegion = diag(1./[0.3 0.3 0.3 0.5 0.5 0.5].^2);
+% initRegion = diag(1./[0.05 0.05 0.1 0.1 0.1 0.15].^2);
 
-for kkk = 8:8
+for kkk = 5:9
 
-Er = 0.0;
-ar = 9 + 2*kkk;
+Er = 0.06;
+ar = 9.8 + 2*kkk;
 
 Kp = diag([10 10 15]);
 Kd = diag([4 4 6]);
 A = [zeros(3,3) eye(3); -Kp -Kd];    
 
-P = lyap(A',-0.1*eye(6));
-P = P/P(1,1);
+P = lyap(A',-eye(6));
+P = P/P(1,1)*initRegion(1,1);
 
-N = 10;
+N = 200;
 
 %%
 rho = sdpvar(1,1);
@@ -45,13 +45,14 @@ monomialOrder = 2;
 c1 = sos(L_init);
 c2 = sos(rho - V ...
          - L_init*(1-e'*initRegion*e));
-
+     
 sol = solvesos([c1 c2],rho,[],coeff_init);
 rhoInit = value(rho);
 
 rhoTemp = rhoInit;
 rhoCont = rhoInit;
 
+%%
 for i=1:N
     [Lrho,Crho] =       polynomial([e;epbar;edbar ],monomialOrder);
     [Lep,Cep] =         polynomial([e;epbar;edbar ],monomialOrder);
@@ -105,40 +106,46 @@ end
 [coeffL1,coeffL3,S_] = findL(dt,P_temp,Q_temp,rhoCont,rhodot,Kp,Kd,Er,ar);
 
 chk = size(find(sum(coeffL1) == 0),2);
-if chk ~= 0
-    SSS{kkk} = 0;
-    disp(['#####',' ','bad',' ',num2str(kkk)])
-else
+% if chk ~= 0
+%     SSS{kkk} = 0;
+%     disp(['#####',' ','bad',' ',num2str(kkk)])
+% else
 %%
-    disp(['#####',' ','good',' ',num2str(kkk)])
-    [rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar);
+%     disp(['#####',' ','good',' ',num2str(kkk)])
+[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar);
 
 %%
     SSS{kkk} = sVars;
     RHO{kkk} = rho;
     PPP{kkk} = p;
+% end
 end
-end
-
 
 %%
-
 % P = [p(1)   0    0  p(3)   0    0;
 %        0  p(1)   0    0  p(3)   0;
 %        0    0  p(2)   0    0  p(4);
 %      p(3)   0    0  p(5)   0    0;
 %        0  p(3)   0    0  p(5)   0;
 %        0    0  p(4)   0    0  p(6)];
-
+%%
 ang = -pi:0.2:pi;
-for jj = 1:10
+for jj = 1:N
     figure(101);clf;
     hold on
-%     P = reshape(double(SSS{8}(:,jj)),6,6);
-    P = reshape(double(sVars(:,jj)),6,6);
+    P = reshape(double(SSS{4}(:,jj)),6,6);
+%     P = reshape(double(sVars(:,jj)),6,6);
 %     P = reshape(double(S_(:,jj)),6,6);
 % P = P / rhoCont(1)
-    kk = 1;
+%     p_ = p(6*(jj-1)+1:6*jj);
+%     P = [p_(1)   0     0   p_(3)   0     0;
+%            0   p_(1)   0     0   p_(3)   0;
+%            0     0   p_(2)   0     0   p_(4);
+%          p_(3)   0     0   p_(5)   0     0;
+%            0   p_(3)   0     0   p_(5)   0;
+%            0     0   p_(4)   0     0   p_(6)];
+%     P = P / rho(jj);
+    kk = 3;
     p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)];
     invp1 = inv(sqrtm(p1));
     p2 = [initRegion(kk,kk) initRegion(kk,kk+3);initRegion(kk+3,kk) initRegion(kk+3,kk+3)];
@@ -149,8 +156,9 @@ for k=1:length(ang)
    yy = invp2*[cos(ang(k));sin(ang(k))];
    my_phase(yy,jj);
 end
-   axis([-0.5 0.5 -1.5 1.5]/5);
+   axis([-0.5 0.5 -1.5 1.5]);
    axis equal
-   pause(0.1);
+   jj
+   pause(0.01);
 end
 
