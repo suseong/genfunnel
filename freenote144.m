@@ -10,7 +10,7 @@ dt = 0.01;
 initRegion = diag(1./[0.3 0.3 0.3 0.5 0.5 0.5].^2);
 % initRegion = diag(1./[0.05 0.05 0.1 0.1 0.1 0.15].^2);
 
-for kkk = 5:9
+for kkk = 8:8
 
 Er = 0.06;
 ar = 9.8 + 2*kkk;
@@ -133,7 +133,7 @@ ang = -pi:0.2:pi;
 for jj = 1:N
     figure(101);clf;
     hold on
-    P = reshape(double(SSS{4}(:,jj)),6,6);
+    P = reshape(double(SSS{8}(:,jj)),6,6);
 %     P = reshape(double(sVars(:,jj)),6,6);
 %     P = reshape(double(S_(:,jj)),6,6);
 % P = P / rhoCont(1)
@@ -145,7 +145,7 @@ for jj = 1:N
 %            0   p_(3)   0     0   p_(5)   0;
 %            0     0   p_(4)   0     0   p_(6)];
 %     P = P / rho(jj);
-    kk = 3;
+    kk = 1;
     p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)];
     invp1 = inv(sqrtm(p1));
     p2 = [initRegion(kk,kk) initRegion(kk,kk+3);initRegion(kk+3,kk) initRegion(kk+3,kk+3)];

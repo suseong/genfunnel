@@ -1,4 +1,4 @@
-function [cost,T,c_x,c_y] = calc_min_cost4(T,p,opts)
+function [cost,T,c_x,c_y,c_z] = calc_min_cost4(T,p,opts)
 
 k = 1/3;
 dt = 0.03;
@@ -7,7 +7,7 @@ del_t(2,:) = dt*[0 -k  1-k 1-2*k 0];
 del_t(3,:) = dt*[0 -k -2*k 1-2*k 0];
 del_t(4,:) = dt*[0 -k -2*k -3*k  0];
 
-[cost,c_x,c_y] = calc_cost4(T,p,opts);
+[cost,c_x,c_y,c_z] = calc_cost4(T,p,opts);
 
 cnt = 0;
 sw = 0;
@@ -37,7 +37,7 @@ for i=1:200
     if sw == 1
         break;
     end
-    [cost_,c_x_,c_y_] = calc_cost4(T_,p,opts);
+    [cost_,c_x_,c_y_,c_z_] = calc_cost4(T_,p,opts);
     if(cost_ < cost)
        convergence(cnt) = 1;
        T = T_;
@@ -45,6 +45,7 @@ for i=1:200
        cnt = cnt - 1;
        c_x = c_x_;
        c_y = c_y_;
+       c_z = c_z_;
     end
 end
 i
