@@ -11,7 +11,7 @@ for i=1:length(Rho)
     plot(Rho{i})
 end
 
-validFinal = 180;
+validFinal = 185;
 
 %%
 P = [];
@@ -24,11 +24,40 @@ for i=1:length(Lyap)
              p(3)   0    0  p(5)   0    0;
                0  p(3)   0    0  p(5)   0;
                0    0  p(4)   0    0  p(6)];
-        P{i,j} = P_ / Rho{i}(j);
+        P{i,j} = P_;
     end
 end
 
 %%
+Kp = diag([10 10 15]);
+Kd = diag([4 4 6]);
+A = [zeros(3,3) eye(3); -Kp -Kd];
+
+P1 = P{8,183};
+P2 = P{8,184};
+rho = Rho{8}(183);
+
+aa_ = -100;
+
+for k = 1:100000
+   e = rand(6,1) - 0.5*ones(6,1);
+   e = e / norm(e);
+   e = inv(sqrtm(P1/rho))*e;
+   ep = norm(e(1:3));
+   ev = norm(e(4:6));
+   Ppv = P1(1,4);
+   Pv = P1(4,4);
+   kp = 15;
+   kd = 6;
+   B = 9.8 + 16;
+   aa = e'*(P1*A+A'*P1)*e + 0.06*(Ppv*ep+Pv*ev)*(kp*ep + kd*ev + B) + e'*(P2 - P1)*e *100;
+   if aa > aa_
+       aa_ = aa
+   end
+end
+
+%%
+
 ang = -pi:0.2:pi+0.1;
 xx = []; yy = []; zz = [];
 xx_ = []; yy_ = []; zz_ = [];
@@ -36,8 +65,9 @@ xx_ = []; yy_ = []; zz_ = [];
 chad = 5;
 for acc = 1:length(Lyap)
     for num = 1:floor(validFinal / chad)
-        p = P{acc,num*chad};
+        p = P{acc,num*chad}/Rho{acc}(num*chad);
         invp = inv(p);      
+        
         for j=1:length(ang)
             for k=1:length(ang)
                 a = [sin(ang(j))*sin(ang(k));sin(ang(j))*cos(ang(k));cos(ang(j));zeros(3,1)];
