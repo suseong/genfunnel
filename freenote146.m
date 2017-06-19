@@ -24,7 +24,7 @@ for i=1:length(Lyap)
              p(3)   0    0  p(5)   0    0;
                0  p(3)   0    0  p(5)   0;
                0    0  p(4)   0    0  p(6)];
-        P{i,j} = P_ / Rho{i}(j);
+        P{i,j} = P_;
     end
 end
 
@@ -36,7 +36,7 @@ xx_ = []; yy_ = []; zz_ = [];
 chad = 5;
 for acc = 1:length(Lyap)
     for num = 1:floor(validFinal / chad)
-        p = P{acc,num*chad};
+        p = P{acc,num*chad}/ Rho{i}(j);
         invp = inv(p);      
         for j=1:length(ang)
             for k=1:length(ang)
@@ -44,7 +44,7 @@ for acc = 1:length(Lyap)
                 lambda = sqrt(a'*invp*a);
                 temp = 1/lambda*invp*a;
                 xx{acc,num}(j,k) = temp(1); yy{acc,num}(j,k) = temp(2); zz{acc,num}(j,k) = temp(3);
-                xx_{acc,num}(j,k) = -temp(1); yy_{acc,num}(j,k) = -temp(2); zz_{acc,num}(j,k) = -temp(3);
+%                 xx_{acc,num}(j,k) = -temp(1); yy_{acc,num}(j,k) = -temp(2); zz_{acc,num}(j,k) = -temp(3);
             end
         end
     end
@@ -52,15 +52,18 @@ end
 p = [];
 
 %%
-figure(20)
+figure(20);clf;
 for acc = 1:length(Lyap)
     subplot(1,8,acc);
     hold on
     for num = 1:floor(validFinal / chad)
-        surf([xx{acc,num} xx_{acc,num}],[yy{acc,num} yy_{acc,num}],[zz{acc,num} zz_{acc,num}]+num*0.05,'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.01*num,'LineStyle','none');
-%         surf(xx{acc,num},yy{acc,num},zz{acc,num}+num*0.05,'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.03*num,'LineStyle','none');
+%         surf([xx{acc,num} xx_{acc,num}],[yy{acc,num} yy_{acc,num}],[zz{acc,num} zz_{acc,num}]+num*0.05,'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.01*num,'LineStyle','none');
+        xlabel('x')
+        ylabel('y')
+        zlabel('time')
+        surf(xx{acc,num},yy{acc,num},zz{acc,num}+num*0.05,'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.01*num,'LineStyle','none');
         axis equal
-        view(0,0)
+        view(30,20)
     end
 end
 
@@ -118,8 +121,8 @@ p2_z = calc_trj_(b_c_z,Tb);
 p3_z = calc_trj_(c_c_z,Tc);
 p4_z = calc_trj_(d_c_z,Td);
 
-figure(30)
-subplot(2,1,1)
+figure(30);clf;
+% subplot(2,1,1)
 hold on
 plot3([p1_x p2_x p3_x p4_x],[p1_y p2_y p3_y p4_y],[p1_z p2_z p3_z p4_z],'-k');
 for i=1:5
@@ -159,10 +162,10 @@ acc_norm = 0;
 for k=1:length(acc)
    acc_norm(k) = norm(acc(:,k)); 
 end
-subplot(2,1,2)
-plot([Ta(1:end-1) Tb(1:end-1) Tc(1:end-1) Td],acc_norm);
-xlabel('sec');
-ylabel('acc');
+% subplot(2,1,2)
+% plot([Ta(1:end-1) Tb(1:end-1) Tc(1:end-1) Td],acc_norm);
+% xlabel('sec');
+% ylabel('acc');
 
 %%
 funnel = [];
@@ -206,13 +209,24 @@ figure(23);
 clf;
 for k = 1:length(tt)
     acc = infos(1,k); num = floor(infos(2,k)/5);
-    surf([xx{acc,num} xx_{acc,num}]+pos(1,k),[yy{acc,num} yy_{acc,num}]+pos(2,k),[zz{acc,num} zz_{acc,num}]+pos(3,k),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.1,'LineStyle','none');
+%     surf([xx{acc,num} xx_{acc,num}]+pos(1,k),[yy{acc,num} yy_{acc,num}]+pos(2,k),[zz{acc,num} zz_{acc,num}]+pos(3,k),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.1,'LineStyle','none');
+    surf([xx{acc,num}]+pos(1,k),[yy{acc,num}]+pos(2,k),[zz{acc,num}]+pos(3,k),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.1,'LineStyle','none');
     hold on
-    axis equal
- end
+end
+grid off
+axis equal
+xlabel('x')
+ylabel('y')
+zlabel('z')
 
 %%
-plot3(pos(:,1),pos(:,2),pos(:,3))
+bag = rosbag('pos2.bag');
+pose = bag.timeseries.Data;
+simPos = pose(:,1:3);
+
+%%
+plot3(simPos(:,1),simPos(:,2),simPos(:,3),'linewidth',3);
+
 
 
 
