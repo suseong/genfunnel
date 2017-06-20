@@ -1,11 +1,11 @@
 clear all
 close all
-clc
+% clc
 
-syms t1 t2 t3 t4 tf real
+syms u t1 t2 t3 t4 tf real
 
-u = 10;
-amax = -5;
+u_ = 10;
+amax = 5;
 
 tt = [];
 
@@ -36,47 +36,93 @@ x4 = x3 + v3*(t4-t3) + 1/2*a3*(t4-t3)^2;
 x5 = x4 + v4*(tf-t4) + 1/2*a4*(tf-t4)^2 + 1/6*u*(tf-t4)^3;
 
 %%
-a5_ = subs(a5,[t2 t4],[t1 t3]);
-v5_ = subs(v5,[t2 t4],[t1 t3]);
-x5_ = subs(x5,[t2 t4],[t1 t3]);
+a5_ = subs(a5,[t2 t4 u],[t1 t3 u_]);
+v5_ = subs(v5,[t2 t4 u],[t1 t3 u_]);
+x5_ = subs(x5,[t2 t4 u],[t1 t3 u_]);
 
 [solt1,solt3,soltf] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t1,t3,tf]);
 
 for k=1:length(solt1)
-   tt = [tt;double([solt1(k) solt1(k) solt3(k) solt3(k) soltf(k)])]; 
+   tt = [tt;double([solt1(k) solt1(k) solt3(k) solt3(k) soltf(k) u_])]; 
 end
 
-%%
-a5_ = subs(a5,[t1 t4],[(-amax-a0)/u,t3]);
-v5_ = subs(v5,[t1 t4],[(-amax-a0)/u,t3]);
-x5_ = subs(x5,[t1 t4],[(-amax-a0)/u,t3]);
+a5_ = subs(a5,[t2 t4 u],[t1 t3 -u_]);
+v5_ = subs(v5,[t2 t4 u],[t1 t3 -u_]);
+x5_ = subs(x5,[t2 t4 u],[t1 t3 -u_]);
+
+[solt1,solt3,soltf] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t1,t3,tf]);
+
+for k=1:length(solt1)
+   tt = [tt;double([solt1(k) solt1(k) solt3(k) solt3(k) soltf(k) -u_])]; 
+end
+
+%% 
+% u > 0, 
+a5_ = subs(a5,[t1 t4 u],[(amax-a0)/u_ t3 u_]);
+v5_ = subs(v5,[t1 t4 u],[(amax-a0)/u_ t3 u_]);
+x5_ = subs(x5,[t1 t4 u],[(amax-a0)/u_ t3 u_]);
 
 [solt2,solt3,soltf] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t2,t3,tf]);
 
 for k=1:length(solt2)
-   tt = [tt;double([(-amax-a0)/u solt2(k) solt3(k) solt3(k) soltf(k)])]; 
+   tt = [tt;double([(amax-a0)/u_ solt2(k) solt3(k) solt3(k) soltf(k) u_])]; 
+end
+
+% u < 0
+a5_ = subs(a5,[t1 t4 u],[(-amax-a0)/-u_,t3,-u_]);
+v5_ = subs(v5,[t1 t4 u],[(-amax-a0)/-u_,t3,-u_]);
+x5_ = subs(x5,[t1 t4 u],[(-amax-a0)/-u_,t3,-u_]);
+
+[solt2,solt3,soltf] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t2,t3,tf]);
+
+for k=1:length(solt2)
+   tt = [tt;double([(-amax-a0)/-u_ solt2(k) solt3(k) solt3(k) soltf(k) -u_])]; 
 end
 
 %%
-a5_ = subs(a5,[t2 tf],[t1,t4 + (af - amax)/u]);
-v5_ = subs(v5,[t2 tf],[t1,t4 + (af - amax)/u]);
-x5_ = subs(x5,[t2 tf],[t1,t4 + (af - amax)/u]);
+% u > 0
+a5_ = subs(a5,[t2 tf u],[t1 t4 + (af+amax)/u_ u_]);
+v5_ = subs(v5,[t2 tf u],[t1 t4 + (af+amax)/u_ u_]);
+x5_ = subs(x5,[t2 tf u],[t1 t4 + (af+amax)/u_ u_]);
 
 [solt1,solt3,solt4] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t1,t3,t4]);
 
 for k=1:length(solt1)
-   tt = [tt;double([solt1(k) solt1(k) solt3(k) solt4(k) solt4(k)+(af - amax)/u])]; 
+   tt = [tt;double([solt1(k) solt1(k) solt3(k) solt4(k) solt4(k)+(af+amax)/u_ u_])]; 
+end
+
+% u < 0
+a5_ = subs(a5,[t2 tf u],[t1,t4 + (af-amax)/-u_ -u_]);
+v5_ = subs(v5,[t2 tf u],[t1,t4 + (af-amax)/-u_ -u_]);
+x5_ = subs(x5,[t2 tf u],[t1,t4 + (af-amax)/-u_ -u_]);
+
+[solt1,solt3,solt4] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t1,t3,t4]);
+
+for k=1:length(solt1)
+   tt = [tt;double([solt1(k) solt1(k) solt3(k) solt4(k) solt4(k)+(af-amax)/-u_ -u_])]; 
 end
 
 %%
-a5_ = subs(a5,[t1 t3],[(-amax-a0)/u,t2 + (-amax-amax)/u]);
-v5_ = subs(v5,[t1 t3],[(-amax-a0)/u,t2 + (-amax-amax)/u]);
-x5_ = subs(x5,[t1 t3],[(-amax-a0)/u,t2 + (-amax-amax)/u]);
+% u > 0
+a5_ = subs(a5,[t1 t3 u],[(amax-a0)/u_ t2 + 2*amax/u_ u_]);
+v5_ = subs(v5,[t1 t3 u],[(amax-a0)/u_ t2 + 2*amax/u_ u_]);
+x5_ = subs(x5,[t1 t3 u],[(amax-a0)/u_ t2 + 2*amax/u_ u_]);
 
 [solt2,solt4,soltf] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t2,t4,tf]);
 
 for k=1:length(solt2)
-   tt = [tt;double([(-amax-a0)/u solt2(k) solt2(k)+(-amax-amax)/u solt4(k) soltf(k)])]; 
+   tt = [tt;double([(amax-a0)/u_ solt2(k) solt2(k)+2*amax/u_ solt4(k) soltf(k) u_])]; 
+end
+
+% u < 0
+a5_ = subs(a5,[t1 t3 u],[(-amax-a0)/-u_ t2 + 2*amax/u_ -u_]);
+v5_ = subs(v5,[t1 t3 u],[(-amax-a0)/-u_ t2 + 2*amax/u_ -u_]);
+x5_ = subs(x5,[t1 t3 u],[(-amax-a0)/-u_ t2 + 2*amax/u_ -u_]);
+
+[solt2,solt4,soltf] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t2,t4,tf]);
+
+for k=1:length(solt2)
+   tt = [tt;double([(-amax-a0)/-u_ solt2(k) solt2(k)+2*amax/u_ solt4(k) soltf(k) -u_])]; 
 end
 
 %%
@@ -84,7 +130,7 @@ chad = diff(real(tt)')';
 
 idx = [];
 for k=1:size(chad,1)
-    temp = sum(find(chad(k,:) >= 0));
+    temp = sum(find(chad(k,1:end-1) >= 0));
     if temp == 10
         idx = [idx;k];
     end
@@ -97,15 +143,15 @@ if idx ~= 0
         x0_ = x0;
         v0_ = v0;
         a0_ = a0;
-        a1_ = subs(a1,[t1 t2 t3 t4 tf],ttt);
-        a2_ = subs(a2,[t1 t2 t3 t4 tf],ttt);
-        a3_ = subs(a3,[t1 t2 t3 t4 tf],ttt);
-        a4_ = subs(a4,[t1 t2 t3 t4 tf],ttt);
-        a5_ = subs(a5,[t1 t2 t3 t4 tf],ttt);
+        a1_ = subs(a1,[t1 t2 t3 t4 tf u],ttt);
+        a2_ = subs(a2,[t1 t2 t3 t4 tf u],ttt);
+        a3_ = subs(a3,[t1 t2 t3 t4 tf u],ttt);
+        a4_ = subs(a4,[t1 t2 t3 t4 tf u],ttt);
+        a5_ = subs(a5,[t1 t2 t3 t4 tf u],ttt);
         
         %%
-        tf_ = ttt(end);
-        tpiece = double([0 ttt]);
+        tf_ = ttt(end-1);
+        tpiece = double([0 ttt(1:end-1)]);
         apiece = double([a0_ a1_ a2_ a3_ a4_ a5_]);
         temp = find(abs(apiece > abs(amax)+1e-5));
         

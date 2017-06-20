@@ -24,68 +24,115 @@ x4 = x3 + v3*(t4-t3) + 1/2*a3*(t4-t3)^2;
 x5 = x4 + v4*(tf-t4) + 1/2*a4*(tf-t4)^2 + 1/6*u*(tf-t4)^3;
 
 %% case 1
-a5_ = subs(a5,[t2 t4],[t1 t3]);
-v5_ = subs(v5,[t2 t4],[t1 t3]);
-x5_ = subs(x5,[t2 t4],[t1 t3]);
+% a5_ = subs(a5,[t2 t4],[t1 t3]);
+% v5_ = subs(v5,[t2 t4],[t1 t3]);
+% x5_ = subs(x5,[t2 t4],[t1 t3]);
+% 
+% t1_ = (af - a0 + 2*u*t3 - u*tf)/(2*u);
+% t3_ = (4*u*vf + (a0^2 - 2*a0*af + 2*a0*tf*u + af^2 - 6*af*tf*u + 3*tf^2*u^2 - 4*v0*u)) / (4*(a0-af)*u + 4*tf*u^2);
+% 
+% t3__ = subs(t3_,[u am x0 v0 a0 xf vf af tf],      [10 5 0 0 0 5 2 0 tfCand]);
+% t1__ = subs(t1_,[u am x0 v0 a0 xf vf af tf t3],   [10 5 0 0 0 5 2 0 tfCand double(t3__)]);
+% x5__ = subs(x5_,[u am x0 v0 a0 xf vf af tf t3 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t1__)]);
 
-t1_ = (af - a0 + 2*u*t3 - u*tf)/(2*u);
-t3_ = (4*u*vf + (a0^2 - 2*a0*af + 2*a0*tf*u + af^2 - 6*af*tf*u + 3*tf^2*u^2 - 4*v0*u)) / (4*(a0-af)*u + 4*tf*u^2);
+%% case 2
+% a5_ = subs(a5,[t1 t4],[(am-a0)/u t3]);
+% v5_ = subs(v5,[t1 t4],[(am-a0)/u t3]);
+% x5_ = subs(x5,[t1 t4],[(am-a0)/u t3]);
+% 
+% chad = simplify(af - a5_);
+% A = simplify(diff(chad,t2));
+% B = simplify(chad - A*t2);
+% t2_ = -B / A;
+% 
+% v5_ = subs(v5_,t2,t2_);
+% 
+% chad = simplify(vf - v5_);
+% A = simplify(diff(diff(chad,t3),t3)/2);
+% B = simplify(diff(chad,t3) - 2*A*t3);
+% C = simplify(chad - A*t3^2 - B*t3);
+
+% % tfCand = 2.14;
+% % A_ = double(subs(A,[u am x0 v0 a0 xf vf af tf],[10 5 0 0 0 5 2 0 tfCand]));
+% % B_ = double(subs(B,[u am x0 v0 a0 xf vf af tf],[10 5 0 0 0 5 2 0 tfCand]));
+% % C_ = double(subs(C,[u am x0 v0 a0 xf vf af tf],[10 5 0 0 0 5 2 0 tfCand]));
+% % 
+% % t1__ = double(subs((am-a0)/u,[u am a0],[10 5 0]));
+% % % t3__ = (-B_ + sqrt(B_^2-4*A_*C_))/(2*A_)
+% % % t2__ = double(subs(t2_,[u am x0 v0 a0 xf vf af tf t3],[10 5 0 0 0 5 2 0 tfCand t3__]))
+% % 
+% % t3__ = (-B_ - sqrt(B_^2-4*A_*C_))/(2*A_);
+% % t2__ = double(subs(t2_,[u am x0 v0 a0 xf vf af tf t3],[10 5 0 0 0 5 2 0 tfCand t3__]));
+% % 
+% % x5__ = double(subs(x5_,[u am x0 v0 a0 xf vf af tf t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t2__) double(t1__)]))
+% % 
+% % a1_ = double(subs(a1,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]));
+% % a2_ = double(subs(a2,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]));
+% % a3_ = double(subs(a3,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]));
+% % a4_ = double(subs(a4,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]));
+% % a5_ = double(subs(a5,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]));
+
+%% u > 0, am > 0 or u < 0, am < 0
+% a5_ = subs(a5,[t2 t4],[t1,tf-(af+am)/u]);
+% v5_ = subs(v5,[t2 t4],[t1,tf-(af+am)/u]);
+% x5_ = subs(x5,[t2 t4],[t1,tf-(af+am)/u]);
+% 
+% chad = simplify(af-a5_);
+% A = simplify(diff(chad,t1));
+% B = simplify(chad - A*t1);
+% t1_ = -B / A;
+% 
+% v5_ = subs(v5_,t1,t1_);
+% 
+% chad = simplify(vf - v5_);
+% A = simplify(diff(diff(chad,t3),t3)/2);
+% B = simplify(diff(chad,t3) - 2*A*t3);
+% C = simplify(chad - A*t3^2 - B*t3);
+
+% % tfCand = 2.1;
+% % A_ = double(subs(A,[u am x0 v0 a0 xf vf af tf],[-10 5 0 0 0 5 2 0 tfCand]));
+% % B_ = double(subs(B,[u am x0 v0 a0 xf vf af tf],[-10 5 0 0 0 5 2 0 tfCand]));
+% % C_ = double(subs(C,[u am x0 v0 a0 xf vf af tf],[-10 5 0 0 0 5 2 0 tfCand]));
+% % 
+% % t3__ = (-B_ - sqrt(B_^2-4*A_*C_))/(2*A_)
+% % t3__ = (-B_ + sqrt(B_^2-4*A_*C_))/(2*A_)
+% % 
+% % 
+% % t1__ = double(subs(t1_,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[-10 5 0 0 0 5 2 0 tfCand 0 double(t3__) 0 0]));
+% % t2__ = t1__;
+% % t4_ = tf - (af - am) / u;
+% % t4__ = double(subs(t4_,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[-10 5 0 0 0 5 2 0 tfCand 0 double(t3__) double(t1__) double(t1__)]));
+% % 
+% % x5__ = double(subs(x5_,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[-10 5 0 0 0 5 2 0 tfCand 0 double(t3__) double(t1__) double(t1__)]));
+% % 
+% % a1_ = double(subs(a1,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t4__) double(t3__) double(t1__) double(t1__)]));
+% % a2_ = double(subs(a2,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t4__) double(t3__) double(t1__) double(t1__)]));
+% % a3_ = double(subs(a3,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t4__) double(t3__) double(t1__) double(t1__)]));
+% % a4_ = double(subs(a4,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t4__) double(t3__) double(t1__) double(t1__)]));
+% % a5_ = double(subs(a5,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t4__) double(t3__) double(t1__) double(t1__)]));
 
 %%
-tfCand = 0.0404;
-t3__ = subs(t3_,[u am x0 v0 a0 xf vf af tf],[10 5 0 0 0 5 2 0 tfCand]);
-t1__ = subs(t1_,[u am x0 v0 a0 xf vf af tf t3],[10 5 0 0 0 5 2 0 tfCand double(t3__)]);
-x5__ = subs(x5_,[u am x0 v0 a0 xf vf af tf t3 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t1__)]);
-double(x5__)
+a5_ = subs(a5,[t1 t3],[(am-a0)/u, t2 + 2*am/u]);
+v5_ = subs(v5,[t1 t3],[(am-a0)/u, t2 + 2*am/u]);
+x5_ = subs(x5,[t1 t3],[(am-a0)/u, t2 + 2*am/u]);
 
-%%
-a5_ = subs(a5,[t1 t4],[(am-a0)/u,t3]);
-v5_ = subs(v5,[t1 t4],[(am-a0)/u,t3]);
-x5_ = subs(x5,[t1 t4],[(am-a0)/u,t3]);
+chad = simplify(af-a5_);
+A = simplify(diff(chad,t4));
+B = simplify(chad - A*t4);
+t4_ = -B / A;
 
-t2_ = (af - am + u*t3 + u*(t3 - tf))/u;
-v5_ = subs(v5_,t2,t2_);
+v5_ = subs(v5_,t4,t4_);
+
 chad = simplify(vf - v5_);
-A = simplify(diff(diff(chad,t3),t3)/2);
-B = simplify(diff(chad,t3) - 2*A*t3);
-C = simplify(chad - A*t3^2 - B*t3);
+A = simplify(diff(chad,t2));
+B = simplify(chad - A*t2);
+t2_ = -B / A;
 
-%%
-tfCand = 2.14;
-A_ = double(subs(A,[u am x0 v0 a0 xf vf af tf],[10 5 0 0 0 5 2 0 tfCand]));
-B_ = double(subs(B,[u am x0 v0 a0 xf vf af tf],[10 5 0 0 0 5 2 0 tfCand]));
-C_ = double(subs(C,[u am x0 v0 a0 xf vf af tf],[10 5 0 0 0 5 2 0 tfCand]));
 
-t1__ = double(subs((am-a0)/u,[u am a0],[10 5 0]));
-% t3__ = (-B_ + sqrt(B_^2-4*A_*C_))/(2*A_)
-% t2__ = double(subs(t2_,[u am x0 v0 a0 xf vf af tf t3],[10 5 0 0 0 5 2 0 tfCand t3__]))
 
-t3__ = (-B_ - sqrt(B_^2-4*A_*C_))/(2*A_);
-t2__ = double(subs(t2_,[u am x0 v0 a0 xf vf af tf t3],[10 5 0 0 0 5 2 0 tfCand t3__]));
-
-x5__ = double(subs(x5_,[u am x0 v0 a0 xf vf af tf t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t2__) double(t1__)]))
-
-a1_ = double(subs(a1,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]))
-a2_ = double(subs(a2,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]))
-a3_ = double(subs(a3,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]))
-a4_ = double(subs(a4,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]))
-a5_ = double(subs(a5,[u am x0 v0 a0 xf vf af tf t4 t3 t2 t1],[10 5 0 0 0 5 2 0 tfCand double(t3__) double(t3__) double(t2__) double(t1__)]))
-
-%%
-a5_ = subs(a5,[t2 tf],[t1,t4 + (af - amax)/u]);
-v5_ = subs(v5,[t2 tf],[t1,t4 + (af - amax)/u]);
-x5_ = subs(x5,[t2 tf],[t1,t4 + (af - amax)/u]);
-
-[solt1,solt3,solt4] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t1,t3,t4]);
-
-for k=1:length(solt1)
-   tt = [tt;double([solt1(k) solt1(k) solt3(k) solt4(k) solt4(k)+(af - amax)/u])]; 
-end
-
-%%
-a5_ = subs(a5,[t1 t3],[(-amax-a0)/u,t2 + (-amax-amax)/u]);
-v5_ = subs(v5,[t1 t3],[(-amax-a0)/u,t2 + (-amax-amax)/u]);
-x5_ = subs(x5,[t1 t3],[(-amax-a0)/u,t2 + (-amax-amax)/u]);
+A = simplify(diff(diff(chad,t2),t2)/2);
+B = simplify(diff(chad,t2) - 2*A*t2);
+C = simplify(chad - A*t2^2 - B*t2);
 
 
 
@@ -97,55 +144,22 @@ x5_ = subs(x5,[t1 t3],[(-amax-a0)/u,t2 + (-amax-amax)/u]);
 
 
 
-[solt2,solt4,soltf] = solve([a5_ == af,v5_ == vf,x5_ == xf],[t2,t4,tf]);
 
-for k=1:length(solt2)
-   tt = [tt;double([(-amax-a0)/u solt2(k) solt2(k)+(-amax-amax)/u solt4(k) soltf(k)])]; 
-end
 
-%%
-chad = diff(real(tt)')';
 
-idx = [];
-for k=1:size(chad,1)
-    temp = sum(find(chad(k,:) >= 0));
-    if temp == 10
-        idx = [idx;k];
-    end
-end
 
-if idx ~= 0
-    for aa = 1:length(idx)
-        ttt = real(tt(idx(aa),:));
-        
-        x0_ = x0;
-        v0_ = v0;
-        a0_ = a0;
-        a1_ = subs(a1,[t1 t2 t3 t4 tf],ttt);
-        a2_ = subs(a2,[t1 t2 t3 t4 tf],ttt);
-        a3_ = subs(a3,[t1 t2 t3 t4 tf],ttt);
-        a4_ = subs(a4,[t1 t2 t3 t4 tf],ttt);
-        a5_ = subs(a5,[t1 t2 t3 t4 tf],ttt);
-        
-        %%
-        tf_ = ttt(end);
-        tpiece = double([0 ttt]);
-        apiece = double([a0_ a1_ a2_ a3_ a4_ a5_]);
-        temp = find(abs(apiece > abs(amax)+1e-5));
-        
-        if(isempty(temp))        
-            sim('simMinTimeTraj');
-            xTraj = traj;
-            figure(2)
-            for k=1:3
-                subplot(3,1,k)
-                plot(xTraj.Time,xTraj.Data(:,k))
-                grid on
-                box on
-            end
-        end
-    end
-end
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
