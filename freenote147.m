@@ -5,15 +5,15 @@ close all
 syms u t1 t2 t3 t4 tf real
 
 u_ = 10;
-amax = 5;
+amax = 6;
 
 tt = [];
 
-x0 = 0;
-v0 = 0;
+x0 = 1;
+v0 = -1;
 a0 = 0;
 
-xf = 5;
+xf = -1;
 vf = 2;
 af = 0;
 
@@ -153,18 +153,19 @@ if idx ~= 0
         tf_ = ttt(end-1);
         tpiece = double([0 ttt(1:end-1)]);
         apiece = double([a0_ a1_ a2_ a3_ a4_ a5_]);
-        temp = find(abs(apiece > abs(amax)+1e-5));
+        temp = find(abs(apiece) > abs(amax)+1e-5);
         
-        if(isempty(temp))        
-            sim('simMinTimeTraj');
-            xTraj = traj;
-            figure(2)
-            for k=1:3
-                subplot(3,1,k)
-                plot(xTraj.Time,xTraj.Data(:,k))
-                grid on
-                box on
-            end
+        if(isempty(temp))
+            tpiece
+%             sim('simMinTimeTraj');
+%             xTraj = traj;
+%             figure(2)
+%             for k=1:3
+%                 subplot(3,1,k)
+%                 plot(xTraj.Time,xTraj.Data(:,k))
+%                 grid on
+%                 box on
+%             end
         end
     end
 end
