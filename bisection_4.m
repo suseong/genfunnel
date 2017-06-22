@@ -6,22 +6,30 @@ k = 0;
 
 goal = finalState(1);
 
-[pos,tsq] = calcX5_4(limit,initState,finalState,initTime(1));
+[pos,tsq] = calcX5_4(limit,initState,finalState,0.1);
+
 if pos < goal
     smallCont = [initTime(1);pos];
 else
     bigCont = [initTime(1);pos];
 end
 
-[pos,tsq] = calcX5_4(limit,initState,finalState,initTime(2));
-if pos < goal
-    smallCont = [initTime(2);pos];
-else
-    bigCont = [initTime(2);pos];
+for k=1:30
+   initTime = 10*rand(1,1);
+   [pos,tsq] = calcX5_4(limit,initState,finalState,initTime);
+   if pos < goal
+       smallCont = [initTime;pos];
+   else
+       bigCont = [initTime;pos];
+   end
+   
+   if and(~isempty(smallCont),~isempty(bigCont)) 
+       break;
+   end
 end
 
 if and(~isempty(smallCont),~isempty(bigCont))
-    time = (initTime(1) + initTime(2))/2;
+    time = (smallCont(1) + bigCont(1))/2;
     [pos,tsq] = calcX5_4(limit,initState,finalState,time);
    
     if pos < goal

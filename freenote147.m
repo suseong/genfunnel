@@ -4,16 +4,25 @@ close all
 
 syms u t1 t2 t3 t4 tf real
 
-u_ = 10;
-amax = 6;
+u_ = 40;
+amax = 1.2959;
 
 tt = [];
 
-x0 = 1;
-v0 = -1;
+% xinit =  [ 5,-2, 0];
+% xfinal = [ 2, 1, 0];
+% 
+% yinit =  [ 0, 3, 0];
+% yfinal = [ 2, 2, 0];
+% 
+% zinit =  [-2, 3, 0];
+% zfinal = [ 0, -2, 0];
+
+x0 = 0;
+v0 = 3;
 a0 = 0;
 
-xf = -1;
+xf = 2;
 vf = 2;
 af = 0;
 
@@ -154,9 +163,11 @@ if idx ~= 0
         tpiece = double([0 ttt(1:end-1)]);
         apiece = double([a0_ a1_ a2_ a3_ a4_ a5_]);
         temp = find(abs(apiece) > abs(amax)+1e-5);
+        temp1 = find(tpiece < 0);
         
-        if(isempty(temp))
+        if and(isempty(temp),isempty(temp1))
             tpiece
+            apiece
 %             sim('simMinTimeTraj');
 %             xTraj = traj;
 %             figure(2)

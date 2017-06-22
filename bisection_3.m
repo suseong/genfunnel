@@ -8,22 +8,41 @@ k = 0;
 
 goal = finalState(1);
 
-[pos,tsq] = calcX5_3(limit,initState,finalState,initTime(1));
+[pos,tsq] = calcX5_3(limit,initState,finalState,0.1);
+
 if pos(idx) < goal
     smallCont = [initTime(1);pos(idx)];
 else
     bigCont = [initTime(1);pos(idx)];
 end
 
-[pos,tsq] = calcX5_3(limit,initState,finalState,initTime(2));
-if pos(idx) < goal
-    smallCont = [initTime(2);pos(idx)];
-else
-    bigCont = [initTime(2);pos(idx)];
+% [pos,tsq] = calcX5_3(limit,initState,finalState,initTime(2));
+% if pos(idx) < goal
+%     smallCont = [initTime(2);pos(idx)];
+% else
+%     bigCont = [initTime(2);pos(idx)];
+% end
+% 
+% if and(~isempty(smallCont),~isempty(bigCont))
+%     time = (initTime(1) + initTime(2))/2;
+
+for k=1:30
+   initTime = 10*rand(1,1);
+   [pos,tsq] = calcX5_3(limit,initState,finalState,initTime);
+   if pos(idx) < goal
+       smallCont = [initTime;pos(idx)];
+   else
+       bigCont = [initTime;pos(idx)];
+   end
+   
+   if and(~isempty(smallCont),~isempty(bigCont)) 
+       break;
+   end
 end
 
 if and(~isempty(smallCont),~isempty(bigCont))
-    time = (initTime(1) + initTime(2))/2;
+    time = (smallCont(1) + bigCont(1))/2;
+
     [pos,tsq] = calcX5_3(limit,initState,finalState,time);
    
     if pos(idx) < goal
@@ -48,6 +67,10 @@ if and(~isempty(smallCont),~isempty(bigCont))
 
         if (norm(pos(idx) - goal) < 1e-3)
             break;
+        end
+        
+        if k > 90
+            keyboard
         end
     end
     
