@@ -32,7 +32,7 @@ k=10;[infos{k,1},infos{k,2},infos{k,3}] = bisection_3(actLimit2,initState,finalS
 
 %% case 4
 initTime = [0.1 20];
-k=11;[infos{k,1},infos{k,2},infos{k,3}] = bisection_4(actLimit1,initState,finalState,initTime);
+% k=11;[infos{k,1},infos{k,2},infos{k,3}] = bisection_4(actLimit1,initState,finalState,initTime);
 
 initTime = [0.1 20];
 k=12;[infos{k,1},infos{k,2},infos{k,3}] = bisection_4(actLimit2,initState,finalState,initTime);

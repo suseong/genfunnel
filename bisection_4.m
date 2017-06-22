@@ -6,6 +6,27 @@ k = 0;
 
 goal = finalState(1);
 
+timeTrials = 0.2:0.5:10;
+posTrials = zeros(1,length(timeTrials));
+
+for k=1:length(timeTrials)
+   [posTrials(k),~] = calcX5_4(limit,initState,finalState,timeTrials(k)); 
+end
+
+chad = 0;
+for k=1:length(timeTrials)-1
+   if (posTrials(k) - goal)*(posTrials(k+1) - goal) <= 0
+       chad = chad + 1;
+      if posTrials(k) < goal
+          smallCont{chad} = [timeTrials(k);posTrials(k)];
+          bigCont{chad} = [timeTrials(k+1);posTrials(k+1)];
+      else
+          smallCont{chad} = [timeTrials(k);posTrials(k)];
+          bigCont{chad} = [timeTrials(k+1);posTrials(k+1)];
+      end
+   end
+end
+
 [pos,tsq] = calcX5_4(limit,initState,finalState,0.1);
 
 if pos < goal
