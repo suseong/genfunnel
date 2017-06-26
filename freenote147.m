@@ -5,7 +5,7 @@ close all
 syms u t1 t2 t3 t4 tf real
 
 u_ = 40;
-amax = 1.2959;
+amax = 0.222;
 
 tt = [];
 
@@ -18,12 +18,12 @@ tt = [];
 % zinit =  [-2, 3, 0];
 % zfinal = [ 0, -2, 0];
 
-x0 = 0;
+x0 = -2;
 v0 = 3;
 a0 = 0;
 
-xf = 2;
-vf = 2;
+xf = 0;
+vf = 0;
 af = 0;
 
 a1 = a0 + t1*u;

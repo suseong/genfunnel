@@ -1,4 +1,4 @@
-function [pos,tsq,k] = bisection_1(limit,initState,finalState,initTime)
+function [posOut,tsqOut] = bisection_1(limit,initState,finalState)
 
 smallCont = [];
 bigCont = [];
@@ -6,67 +6,61 @@ k = 0;
 
 goal = finalState(1);
 
-[pos,tsq] = calcX5_1(limit,initState,finalState,0.1);
+timeTrials = 0.2:0.5:20;
+posTrials = zeros(1,length(timeTrials));
 
-if pos < goal
-    smallCont = [initTime(1);pos];
-else
-    bigCont = [initTime(1);pos];
+for k=1:length(timeTrials)
+   [posTrials(k),~] = calcX5_1(limit,initState,finalState,timeTrials(k)); 
 end
-% 
-% [pos,tsq] = calcX5_1(limit,initState,finalState,initTime(2));
-% if pos < goal
-%     smallCont = [initTime(2);pos];
-% else
-%     bigCont = [initTime(2);pos];
-% end
-% 
-% if and(~isempty(smallCont),~isempty(bigCont))
-%     time = (initTime(1) + initTime(2))/2;
 
-for k=1:30
-   initTime = 10*rand(1,1);
-   [pos,tsq] = calcX5_1(limit,initState,finalState,initTime);
-   if pos < goal
-       smallCont = [initTime;pos];
-   else
-       bigCont = [initTime;pos];
-   end
-   
-   if and(~isempty(smallCont),~isempty(bigCont)) 
-       break;
+chad = 0;
+for k=1:length(timeTrials)-1
+   if (posTrials(k) - goal)*(posTrials(k+1) - goal) <= 0
+       chad = chad + 1;
+      if posTrials(k) < goal
+          smallCont{chad} = [timeTrials(k);posTrials(k)];
+          bigCont{chad} = [timeTrials(k+1);posTrials(k+1)];
+      else
+          bigCont{chad} = [timeTrials(k);posTrials(k)];
+          smallCont{chad} = [timeTrials(k+1);posTrials(k+1)];
+      end
    end
 end
+
+posOut = [];
+tsqOut = [];
 
 if and(~isempty(smallCont),~isempty(bigCont))
-    time = (smallCont(1) + bigCont(1))/2;
-    [pos,tsq] = calcX5_1(limit,initState,finalState,time);
-   
-    if pos < goal
-        smallCont = [time;pos];
-    else
-        bigCont = [time;pos];
-    end
-    
-    for k = 1:50
-        if (pos >= goal)
-            time = (time + smallCont(1,end)) / 2;
-        else
-            time = (time + bigCont(1,end)) / 2;
-        end
+    for j = 1:length(smallCont)
+        time = (smallCont{j}(1) + bigCont{j}(1))/2;
         [pos,tsq] = calcX5_1(limit,initState,finalState,time);
         
         if pos < goal
-            smallCont = [time;pos];
+            smallCont{j} = [time;pos];
         else
-            bigCont = [time;pos];
+            bigCont{j} = [time;pos];
         end
-        if (norm(pos - goal) < 1e-3)
-            break;
-        end
-        if k > 40
-            keyboard
+        
+        for k = 1:100
+            if (pos >= goal)
+                time = (time + smallCont{j}(1)) / 2;
+            else
+                time = (time + bigCont{j}(1)) / 2;
+            end
+            [pos,tsq] = calcX5_1(limit,initState,finalState,time);
+            
+            if pos < goal
+                smallCont{j} = [time;pos];
+            else
+                bigCont{j} = [time;pos];
+            end
+            if (norm(pos - goal) < 1e-3)
+                posOut{j} = pos;
+                tsqOut{j} = tsq;
+                break;
+            end
         end
     end
-    
+end
+
 end

@@ -1,4 +1,4 @@
-function [pos,tsq,k] = bisection_4(limit,initState,finalState,initTime)
+function [posOut,tsqOut] = bisection_4(limit,initState,finalState)
 
 smallCont = [];
 bigCont = [];
@@ -6,7 +6,7 @@ k = 0;
 
 goal = finalState(1);
 
-timeTrials = 0.2:0.5:10;
+timeTrials = 0.2:0.5:20;
 posTrials = zeros(1,length(timeTrials));
 
 for k=1:length(timeTrials)
@@ -21,60 +21,46 @@ for k=1:length(timeTrials)-1
           smallCont{chad} = [timeTrials(k);posTrials(k)];
           bigCont{chad} = [timeTrials(k+1);posTrials(k+1)];
       else
-          smallCont{chad} = [timeTrials(k);posTrials(k)];
-          bigCont{chad} = [timeTrials(k+1);posTrials(k+1)];
+          bigCont{chad} = [timeTrials(k);posTrials(k)];
+          smallCont{chad} = [timeTrials(k+1);posTrials(k+1)];
       end
    end
 end
 
-[pos,tsq] = calcX5_4(limit,initState,finalState,0.1);
-
-if pos < goal
-    smallCont = [initTime(1);pos];
-else
-    bigCont = [initTime(1);pos];
-end
-
-for k=1:30
-   initTime = 10*rand(1,1);
-   [pos,tsq] = calcX5_4(limit,initState,finalState,initTime);
-   if pos < goal
-       smallCont = [initTime;pos];
-   else
-       bigCont = [initTime;pos];
-   end
-   
-   if and(~isempty(smallCont),~isempty(bigCont)) 
-       break;
-   end
-end
+posOut = [];
+tsqOut = [];
 
 if and(~isempty(smallCont),~isempty(bigCont))
-    time = (smallCont(1) + bigCont(1))/2;
-    [pos,tsq] = calcX5_4(limit,initState,finalState,time);
-   
-    if pos < goal
-        smallCont = [time;pos];
-    else
-        bigCont = [time;pos];
-    end
-    
-    for k = 1:100
-        if (pos >= goal)
-            time = (time + smallCont(1,end)) / 2;
-        else
-            time = (time + bigCont(1,end)) / 2;
-        end
+    for j = 1:length(smallCont)
+        time = (smallCont{j}(1) + bigCont{j}(1))/2;
         [pos,tsq] = calcX5_4(limit,initState,finalState,time);
         
         if pos < goal
-            smallCont = [time;pos];
+            smallCont{j} = [time;pos];
         else
-            bigCont = [time;pos];
+            bigCont{j} = [time;pos];
         end
-        if (norm(pos - goal) < 1e-3)
-            break;
+        
+        for k = 1:100
+            if (pos >= goal)
+                time = (time + smallCont{j}(1)) / 2;
+            else
+                time = (time + bigCont{j}(1)) / 2;
+            end
+            [pos,tsq] = calcX5_4(limit,initState,finalState,time);
+            
+            if pos < goal
+                smallCont{j} = [time;pos];
+            else
+                bigCont{j} = [time;pos];
+            end
+            if (norm(pos - goal) < 1e-3)
+                posOut{j} = pos;
+                tsqOut{j} = tsq;
+                break;
+            end
         end
     end
-    
+end
+
 end
