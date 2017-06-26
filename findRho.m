@@ -1,6 +1,6 @@
 function [rho,sOut,p_,solProblem] = findRho(dt,A,Crho1_,Crho3_,initRegion,Kp,Kd,Er,ar)
 
-checkDependency('yalmip');
+% checkDependency('yalmip');
 monomialOrder = 2;
 
 maxKp = max(max(Kp));

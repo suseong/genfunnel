@@ -2,27 +2,29 @@ clear all
 close all
 clc
 
-checkDependency('yalmip');
+% checkDependency('yalmip');
 
 e = sdpvar(6,1);
 dt = 0.01;
 
-initRegion = diag(1./[0.3 0.3 0.3 0.5 0.5 0.5].^2);
+initRegion = diag(1./[0.5 0.5 0.5 0.3 0.3 0.3].^2);
 % initRegion = diag(1./[0.05 0.05 0.1 0.1 0.1 0.15].^2);
 
-for kkk = 8:8
+%%
+for kkk = 1:1
 
-Er = 0.06;
-ar = 9.8 + 2*kkk;
+Er = 0.03;
+% ar = 9.8 + 2*kkk;
+ar = 9.8 + 10;
 
-Kp = diag([10 10 15]);
-Kd = diag([4 4 6]);
+Kp = diag([10 10 10]);
+Kd = diag([4 4 4]);
 A = [zeros(3,3) eye(3); -Kp -Kd];    
 
 P = lyap(A',-eye(6));
 P = P/P(1,1)*initRegion(1,1);
 
-N = 200;
+N = 100;
 
 %%
 rho = sdpvar(1,1);
@@ -37,7 +39,7 @@ maxKd = max(max(Kd));
 
 V = e'*P*e;
 Vdot = e'*(P*A+A'*P)*e ...
-       + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar);
+       + 2*(2 + Er*(2 + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar);
 
 monomialOrder = 2;
 [L_init,coeff_init] = polynomial(e,monomialOrder);
@@ -88,6 +90,7 @@ for i=1:N
 
     rhoTemp = rhoTemp + value(rhodot)*dt;
     rhoCont(i+1) = rhoTemp;
+    i
 end
 
 %%
@@ -133,7 +136,7 @@ ang = -pi:0.2:pi;
 for jj = 1:N
     figure(101);clf;
     hold on
-    P = reshape(double(SSS{8}(:,jj)),6,6);
+    P = reshape(double(SSS{1}(:,jj)),6,6);
 %     P = reshape(double(sVars(:,jj)),6,6);
 %     P = reshape(double(S_(:,jj)),6,6);
 % P = P / rhoCont(1)
@@ -150,13 +153,13 @@ for jj = 1:N
     invp1 = inv(sqrtm(p1));
     p2 = [initRegion(kk,kk) initRegion(kk,kk+3);initRegion(kk+3,kk) initRegion(kk+3,kk+3)];
     invp2 = inv(sqrtm(p2));
-for k=1:length(ang)
-   xx = invp1*[cos(ang(k));sin(ang(k))];
-   plot(xx(1),xx(2),'.','markersize',15) 
-   yy = invp2*[cos(ang(k));sin(ang(k))];
-   my_phase(yy,jj);
-end
-   axis([-0.5 0.5 -1.5 1.5]);
+    for k=1:length(ang)
+        xx = invp1*[cos(ang(k));sin(ang(k))];
+        plot(xx(1),xx(2),'.','markersize',15)
+        yy = invp2*[cos(ang(k));sin(ang(k))];
+        my_phase(yy,jj);
+    end
+%    axis([-0.5 0.5 -1.5 1.5]);
    axis equal
    jj
    pause(0.01);

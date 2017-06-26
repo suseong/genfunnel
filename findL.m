@@ -1,6 +1,6 @@
 function [coeff1_,coeff3_,S_] = findL(dt,P,Q,rho,rhodot,Kp,Kd,Er,ar)
 
-checkDependency('yalmip');
+% checkDependency('yalmip');
 monomialOrder = 2;
 N = length(rho)-1;
 coeff1_ = [];
