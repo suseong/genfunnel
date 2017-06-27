@@ -1,4 +1,4 @@
-function [rho,sOut,p_,solProblem] = findRho(dt,A,Crho1_,Crho3_,initRegion,Kp,Kd,Er,ar)
+function [rho,sOut,p_,solProblem] = findRho(dt,P_init,A,Crho1_,Crho3_,initRegion,Kp,Kd,Er,ar,unc)
 
 % checkDependency('yalmip');
 monomialOrder = 2;
@@ -9,7 +9,7 @@ maxKd = max(max(Kd));
 N = size(Crho1_,2);
 
 rho = sdpvar(N,1);
-p_ = sdpvar(6*N,1);
+p_ = sdpvar(6*(N-1),1);
 
 e = sdpvar(6,1);
 epbar = sdpvar(1,1);
@@ -25,17 +25,26 @@ k=1;
 
 Ppv = sdpvar(1,1);
 Pv = sdpvar(1,1);
-S = sdpvar(6,6);
+
+s = sdpvar(6,1);
+S = [s(1)   0    0  s(3)   0    0;
+       0  s(1)   0    0  s(3)   0;
+       0    0  s(2)   0    0  s(4);
+     s(3)   0    0  s(5)   0    0;
+       0  s(3)   0    0  s(5)   0;
+       0    0  s(4)   0    0  s(6)];
+   
+P = P_init;
+% p = p_(6*(k-1)+1:6*k);
+% P = [p(1)   0    0  p(3)   0    0;
+%        0  p(1)   0    0  p(3)   0;
+%        0    0  p(2)   0    0  p(4);
+%      p(3)   0    0  p(5)   0    0;
+%        0  p(3)   0    0  p(5)   0;
+%        0    0  p(4)   0    0  p(6)];
 
 p = p_(6*(k-1)+1:6*k);
-P = [p(1)   0    0  p(3)   0    0;
-       0  p(1)   0    0  p(3)   0;
-       0    0  p(2)   0    0  p(4);
-     p(3)   0    0  p(5)   0    0;
-       0  p(3)   0    0  p(5)   0;
-       0    0  p(4)   0    0  p(6)];
-
-p = p_(6*k+1:6*(k+1));
+% p = p_(6*k+1:6*(k+1));
 Pnext = [p(1)   0    0  p(3)   0    0;
            0  p(1)   0    0  p(3)   0;
            0    0  p(2)   0    0  p(4);
@@ -45,7 +54,7 @@ Pnext = [p(1)   0    0  p(3)   0    0;
 
 V = e'*P*e;
 Vdot = e'*(P*A+A'*P)*e ...
-       + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar) ...
+       + 2*(unc + Er*(unc + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar) ...
        + e'*(Pnext - P)*e / dt;
 rhodot = (rho(k+1) - rho(k))/dt;
 
@@ -93,27 +102,37 @@ constraints = [constraints c1 c2 c3 c4 c5 c6 c7 ...
                c8 c9 c10 c11 c12 c13 c14 c15];
 
 vars = [Ppv;Pv;Crho2;Cep;Ced;Cepsign;Cedsign]; 
-sVars = [sVars;S(:)];
-sOut = [sOut S(:)];
+sVars = [sVars;s];
+sOut = [sOut s];
 
 cost = cost + geomean(S);
 
 for k=2:N
     Ppv = sdpvar(1,1);
     Pv = sdpvar(1,1);
-    S = sdpvar(6,6);
+    s = sdpvar(6,1);
+    S = [s(1)   0    0  s(3)   0    0;
+           0  s(1)   0    0  s(3)   0;
+           0    0  s(2)   0    0  s(4);
+         s(3)   0    0  s(5)   0    0;
+           0  s(3)   0    0  s(5)   0;
+           0    0  s(4)   0    0  s(6)];
 
-    p = p_(6*(k-1)+1:6*k);
-    P = [p(1)   0    0  p(3)   0    0;
-           0  p(1)   0    0  p(3)   0;
+%     p = p_(6*(k-1)+1:6*k);
+p = p_(6*(k-2)+1:6*(k-1));
+
+P = [p(1)   0    0  p(3)   0    0;
+    0  p(1)   0    0  p(3)   0;
            0    0  p(2)   0    0  p(4);
          p(3)   0    0  p(5)   0    0;
            0  p(3)   0    0  p(5)   0;
            0    0  p(4)   0    0  p(6)];
+
     V = e'*P*e;
     
     if k ~= N
-        p = p_(6*k+1:6*(k+1));
+        p = p_(6*(k-1)+1:6*k);
+                
         Pnext = [p(1)   0    0  p(3)   0    0;
                    0  p(1)   0    0  p(3)   0;
                    0    0  p(2)   0    0  p(4);
@@ -122,12 +141,12 @@ for k=2:N
                    0    0  p(4)   0    0  p(6)];
 
         Vdot = e'*(P*A+A'*P)*e ...
-            + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar) ...
+            + 2*(unc + Er*(unc + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar) ...
             + e'*(Pnext - P)*e / dt;
         rhodot = (rho(k+1) - rho(k))/dt;
     else
         Vdot = e'*(P*A+A'*P)*e ...
-            + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar);
+            + 2*(unc + Er*(unc + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar);
         rhodot = 0;        
     end
     
@@ -169,9 +188,9 @@ for k=2:N
     constraints = [constraints c1 c2 c3 c6 c7 ...
                    c8 c9 c10 c11 c12 c13 c14 c15];
 
-    vars = [vars;Ppv;Pv;Cep;Ced;Cepsign;Cedsign]; 
-    sVars = [sVars;S(:)];
-    sOut = [sOut S(:)];
+    vars  = [vars;Ppv;Pv;Cep;Ced;Cepsign;Cedsign]; 
+    sVars = [sVars;s];
+    sOut  = [sOut s];
 
     cost = cost + geomean(S);
 end

@@ -3,15 +3,28 @@ close
 clc
 
 %%
-K = diag([10 10 15 4 4 6]);
+K = diag([10 10 10 4 4 4]);
 % P = randn(6,6); P = P'*P/100
-P = diag([0.1 0.1 0.1 0.05 0.05 0.05]);
+P = diag([0.05 0.05 0.05 0.05 0.05 0.05]);
 P = P*P;
-det(P);
-Q = inv(P)/(-2*log(30) - log((2*pi)^6*det(P)));
+
+%%
+m = 6.5; % 95 percent confidence
+2 - 2*exp(-m) - 2*m*exp(-m) - m^2*exp(-m)
+
+e = [1 0 0 0 0 0]';
+chad = e'*inv(P)*e;
+e = e / sqrt(chad) * sqrt(6.3);
+
+e'*inv(P)*e
+
+% d = 1/sqrt((2*pi)^6*det(P))*exp(-0.5*e'*inv(P)*e);
+d = 1/sqrt((2*pi)^6*det(P))*exp(-0.5*10);
+
+Q = inv(P)/(-2*log(d) - log((2*pi)^6*det(P)));
 
 eval = eig(inv(Q)*K^2);
-plz = sqrt(max(eval));
+plz = sqrt(max(eval))
 
 %%
 minVal = 100;
@@ -26,6 +39,8 @@ for k=1:10000000
     if(chad < minVal)
         minVal = chad;
         disp(num2str(minVal));
+        e'
     end
 end
 
+%%

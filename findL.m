@@ -1,4 +1,4 @@
-function [coeff1_,coeff3_,S_] = findL(dt,P,Q,rho,rhodot,Kp,Kd,Er,ar)
+function [coeff1_,coeff3_,S_] = findL(dt,P,Q,rho,rhodot,Kp,Kd,Er,ar,unc)
 
 % checkDependency('yalmip');
 monomialOrder = 2;
@@ -12,7 +12,14 @@ maxKd = max(max(Kd));
 
 parfor i=1:N
        e = sdpvar(6,1);
-       S = sdpvar(6,6);
+       s = sdpvar(6,1);
+       S = [s(1)   0    0  s(3)   0    0;
+              0  s(1)   0    0  s(3)   0;
+              0    0  s(2)   0    0  s(4);
+            s(3)   0    0  s(5)   0    0;
+              0  s(3)   0    0  s(5)   0;
+              0    0  s(4)   0    0  s(6)];
+       
        epbar = sdpvar(1,1);
        edbar = sdpvar(1,1);
        Ppv = sdpvar(1,1);
@@ -27,7 +34,7 @@ parfor i=1:N
        
        V = e'*P{i}*e;
        Vdot = e'*Q{i}*e ...
-              + Er*(maxKp*epbar + maxKd*edbar + ar)*(Ppv*epbar + Pv*edbar) ...
+              + 2*(unc + Er*(unc + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar) ...
               + e'*(P{i+1} - P{i})*e / dt;
        
        c1 = sos(rhodot(i) - Vdot ...
@@ -67,11 +74,11 @@ parfor i=1:N
        if sol.problem == 0
            coeff1_(:,i) = value(Crho1);
            coeff3_(:,i) = value(Crho2);
-           S_(:,i) = value(S(:));   
+           S_(:,i) = value(s);   
        else
            coeff1_(:,i) = zeros(size(Crho1));
            coeff3_(:,i) = zeros(size(Crho2)); 
-           S_(:,i) = zeros(size(S(:)));           
+           S_(:,i) = zeros(size(s));           
        end
 end
 

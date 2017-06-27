@@ -15,5 +15,5 @@ u  = y(1);
 w  = y(2);
 kp = 10; kd = 4;
 % kp = 15; kd = 6;
-dX = [w; -kp*u-kd*w];
+dX = [w; -kp*(u+0.37)-kd*w];
 end
