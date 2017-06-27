@@ -9,17 +9,17 @@ P = diag([0.05 0.05 0.05 0.05 0.05 0.05]);
 P = P*P;
 
 %%
-m = 6.5; % 95 percent confidence
-2 - 2*exp(-m) - 2*m*exp(-m) - m^2*exp(-m)
+m = 6.3; % 95 percent confidence
+conf = (2 - 2*exp(-m) - 2*m*exp(-m) - m^2*exp(-m))/2
 
 e = [1 0 0 0 0 0]';
 chad = e'*inv(P)*e;
-e = e / sqrt(chad) * sqrt(6.3);
+e = e / sqrt(chad) * sqrt(6.3*2);
 
 e'*inv(P)*e
 
 % d = 1/sqrt((2*pi)^6*det(P))*exp(-0.5*e'*inv(P)*e);
-d = 1/sqrt((2*pi)^6*det(P))*exp(-0.5*10);
+d = 1/sqrt((2*pi)^6*det(P))*exp(-0.5*12.6);
 
 Q = inv(P)/(-2*log(d) - log((2*pi)^6*det(P)));
 

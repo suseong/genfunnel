@@ -7,15 +7,14 @@ clc
 e = sdpvar(6,1);
 dt = 0.01;
 
-initRegion = diag(1./[0.5 0.5 0.5 0.3 0.3 0.3].^2);
+initRegion = diag(1./[0.4 0.4 0.4 0.3 0.3 0.3].^2);
 % initRegion = diag(1./[0.05 0.05 0.1 0.1 0.1 0.15].^2);
 
 %%
 for kkk = 1:1
 
-Er = 0.03;
-% ar = 9.8 + 2*kkk;
-ar = 9.8 + 5;
+Er = 0.02;
+ar = 9.8 + 10;
 
 Kp = diag([10 10 10]);
 Kd = diag([4 4 4]);
@@ -24,7 +23,7 @@ A = [zeros(3,3) eye(3); -Kp -Kd];
 P = lyap(A',-eye(6));
 P = P/P(1,1)*initRegion(1,1);
 
-N = 30;
+N = 200;
 
 unc = 1.8;
 
@@ -117,7 +116,7 @@ chk = size(find(sum(coeffL1) == 0),2);
 % else
 %%
 %     disp(['#####',' ','good',' ',num2str(kkk)])
-[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar,unc);
+[rho,sVars,p,solProblem] = findRho(dt,P,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar,unc);
 
 %%
     SSS{kkk} = sVars;
@@ -127,29 +126,18 @@ chk = size(find(sum(coeffL1) == 0),2);
 end
 
 %%
-% P = [p(1)   0    0  p(3)   0    0;
-%        0  p(1)   0    0  p(3)   0;
-%        0    0  p(2)   0    0  p(4);
-%      p(3)   0    0  p(5)   0    0;
-%        0  p(3)   0    0  p(5)   0;
-%        0    0  p(4)   0    0  p(6)];
-%%
 ang = -pi:0.2:pi;
 for jj = 1:N
     figure(101);clf;
     hold on
-    P = reshape(double(SSS{1}(:,jj)),6,6);
-%     P = reshape(double(sVars(:,jj)),6,6);
-%     P = reshape(double(S_(:,jj)),6,6);
-% P = P / rhoCont(1)
-%     p_ = p(6*(jj-1)+1:6*jj);
-%     P = [p_(1)   0     0   p_(3)   0     0;
-%            0   p_(1)   0     0   p_(3)   0;
-%            0     0   p_(2)   0     0   p_(4);
-%          p_(3)   0     0   p_(5)   0     0;
-%            0   p_(3)   0     0   p_(5)   0;
-%            0     0   p_(4)   0     0   p_(6)];
-%     P = P / rho(jj);
+    p = SSS{1}(:,jj);
+    P = [p(1)   0    0  p(3)   0    0;
+           0  p(1)   0    0  p(3)   0;
+           0    0  p(2)   0    0  p(4);
+         p(3)   0    0  p(5)   0    0;
+           0  p(3)   0    0  p(5)   0;
+           0    0  p(4)   0    0  p(6)];
+
     kk = 1;
     p1 = [P(kk,kk) P(kk,kk+3);P(kk+3,kk) P(kk+3,kk+3)];
     invp1 = inv(sqrtm(p1));
@@ -161,8 +149,9 @@ for jj = 1:N
         yy = invp2*[cos(ang(k));sin(ang(k))];
         my_phase(yy,jj);
     end
-%    axis([-0.5 0.5 -1.5 1.5]);
+   axis([-0.5 0.5 -2 2]);
    axis equal
+   grid on
    jj
    pause(0.01);
 end
