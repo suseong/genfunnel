@@ -15,7 +15,7 @@ for kkk = 1:1
 
 Er = 0.03;
 % ar = 9.8 + 2*kkk;
-ar = 9.8 + 10;
+ar = 9.8 + 5;
 
 Kp = diag([10 10 10]);
 Kd = diag([4 4 4]);
@@ -24,7 +24,9 @@ A = [zeros(3,3) eye(3); -Kp -Kd];
 P = lyap(A',-eye(6));
 P = P/P(1,1)*initRegion(1,1);
 
-N = 100;
+N = 30;
+
+unc = 1.8;
 
 %%
 rho = sdpvar(1,1);
@@ -39,7 +41,7 @@ maxKd = max(max(Kd));
 
 V = e'*P*e;
 Vdot = e'*(P*A+A'*P)*e ...
-       + 2*(2 + Er*(2 + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar);
+       + 2*(unc + Er*(unc + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar);
 
 monomialOrder = 2;
 [L_init,coeff_init] = polynomial(e,monomialOrder);
@@ -106,7 +108,7 @@ for k = 1:N+1
 end
 
 %%
-[coeffL1,coeffL3,S_] = findL(dt,P_temp,Q_temp,rhoCont,rhodot,Kp,Kd,Er,ar);
+[coeffL1,coeffL3,S_] = findL(dt,P_temp,Q_temp,rhoCont,rhodot,Kp,Kd,Er,ar,unc);
 
 chk = size(find(sum(coeffL1) == 0),2);
 % if chk ~= 0
@@ -115,7 +117,7 @@ chk = size(find(sum(coeffL1) == 0),2);
 % else
 %%
 %     disp(['#####',' ','good',' ',num2str(kkk)])
-[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar);
+[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar,unc);
 
 %%
     SSS{kkk} = sVars;
