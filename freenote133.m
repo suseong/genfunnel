@@ -9,17 +9,18 @@ P = diag([0.05 0.05 0.05 0.05 0.05 0.05]);
 P = P*P;
 
 %%
-m = 6.3; % 95 percent confidence
+% m = 6.3; % 95 percent confidence
+m = 4.8;
 conf = (2 - 2*exp(-m) - 2*m*exp(-m) - m^2*exp(-m))/2
 
-e = [1 0 0 0 0 0]';
+e = [0 0 0 1 0 0]';
 chad = e'*inv(P)*e;
-e = e / sqrt(chad) * sqrt(6.3*2);
+e = e / sqrt(chad) * sqrt(m*2);
 
 e'*inv(P)*e
 
 % d = 1/sqrt((2*pi)^6*det(P))*exp(-0.5*e'*inv(P)*e);
-d = 1/sqrt((2*pi)^6*det(P))*exp(-0.5*12.6);
+d = 1/sqrt((2*pi)^6*det(P))*exp(-0.5*2*m);
 
 Q = inv(P)/(-2*log(d) - log((2*pi)^6*det(P)));
 
@@ -27,20 +28,18 @@ eval = eig(inv(Q)*K^2);
 plz = sqrt(max(eval))
 
 %%
-minVal = 100;
-
-for k=1:10000000
-    e = 10*(rand(6,1)-0.5*ones(6,1));
-    chad = e'*Q*e;
-    e = e / sqrt(chad);
-    
-    chad = plz - norm(K*e);
-    
-    if(chad < minVal)
-        minVal = chad;
-        disp(num2str(minVal));
-        e'
-    end
-end
-
-%%
+% minVal = 100;
+% 
+% for k=1:10000000
+%     e = 10*(rand(6,1)-0.5*ones(6,1));
+%     chad = e'*Q*e;
+%     e = e / sqrt(chad);
+%     
+%     chad = plz - norm(K*e);
+%     
+%     if(chad < minVal)
+%         minVal = chad;
+%         disp(num2str(minVal));
+%         e'
+%     end
+% end

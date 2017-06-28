@@ -2,18 +2,15 @@ clear all
 close all
 clc
 
-% checkDependency('yalmip');
-
 e = sdpvar(6,1);
 dt = 0.01;
 
 initRegion = diag(1./[0.4 0.4 0.4 0.3 0.3 0.3].^2);
-% initRegion = diag(1./[0.05 0.05 0.1 0.1 0.1 0.15].^2);
 
 %%
 for kkk = 1:1
 
-Er = 0.02;
+Er = 0.0;
 ar = 9.8 + 10;
 
 Kp = diag([10 10 10]);
@@ -23,9 +20,9 @@ A = [zeros(3,3) eye(3); -Kp -Kd];
 P = lyap(A',-eye(6));
 P = P/P(1,1)*initRegion(1,1);
 
-N = 200;
+N = 50;
 
-unc = 1.8;
+unc = 1.5;
 
 %%
 rho = sdpvar(1,1);
@@ -116,7 +113,7 @@ chk = size(find(sum(coeffL1) == 0),2);
 % else
 %%
 %     disp(['#####',' ','good',' ',num2str(kkk)])
-[rho,sVars,p,solProblem] = findRho(dt,P,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar,unc);
+[rho,sVars,p,solProblem] = findRho(dt,A,coeffL1,coeffL3,initRegion,Kp,Kd,Er,ar,unc);
 
 %%
     SSS{kkk} = sVars;
@@ -131,6 +128,7 @@ for jj = 1:N
     figure(101);clf;
     hold on
     p = SSS{1}(:,jj);
+% p = zeros(6,1);
     P = [p(1)   0    0  p(3)   0    0;
            0  p(1)   0    0  p(3)   0;
            0    0  p(2)   0    0  p(4);
@@ -155,4 +153,27 @@ for jj = 1:N
    jj
    pause(0.01);
 end
+
+%%
+p = PPP{1};
+p_ = reshape(p,6,length(p)/6);
+pdiff = diff(p_')';
+pdiffnorm = [];
+
+for k=1:size(pdiff,2)
+   pdiffnorm(k) = norm(pdiff(:,k));
+end
+
+%%
+figure(11111)
+subplot(2,1,1)
+plot(rho)
+subplot(2,1,2)
+plot(pdiffnorm(1:end-1))
+
+
+
+
+
+
 

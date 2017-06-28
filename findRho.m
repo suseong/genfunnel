@@ -1,6 +1,5 @@
-function [rho,sOut,p_,solProblem] = findRho(dt,P_init,A,Crho1_,Crho3_,initRegion,Kp,Kd,Er,ar,unc)
+function [rho,sOut,p_,solProblem] = findRho(dt,A,Crho1_,Crho3_,initRegion,Kp,Kd,Er,ar,unc)
 
-% checkDependency('yalmip');
 monomialOrder = 2;
 
 maxKp = max(max(Kp));
@@ -33,8 +32,7 @@ S = [s(1)   0    0  s(3)   0    0;
      s(3)   0    0  s(5)   0    0;
        0  s(3)   0    0  s(5)   0;
        0    0  s(4)   0    0  s(6)];
-   
-% P = P_init;
+
 p = p_(6*(k-1)+1:6*k);
 P = [p(1)   0    0  p(3)   0    0;
        0  p(1)   0    0  p(3)   0;
@@ -43,7 +41,6 @@ P = [p(1)   0    0  p(3)   0    0;
        0  p(3)   0    0  p(5)   0;
        0    0  p(4)   0    0  p(6)];
 
-% p = p_(6*(k-1)+1:6*k);
 p = p_(6*k+1:6*(k+1));
 Pnext = [p(1)   0    0  p(3)   0    0;
            0  p(1)   0    0  p(3)   0;
@@ -119,7 +116,6 @@ for k=2:N
            0    0  s(4)   0    0  s(6)];
 
     p = p_(6*(k-1)+1:6*k);
-% p = p_(6*(k-2)+1:6*(k-1));
 
 P = [p(1)   0    0  p(3)   0    0;
     0  p(1)   0    0  p(3)   0;
@@ -131,7 +127,6 @@ P = [p(1)   0    0  p(3)   0    0;
     V = e'*P*e;
     
     if k ~= N
-%         p = p_(6*(k-1)+1:6*k);
         p = p_(6*k+1:6*(k+1));
                 
         Pnext = [p(1)   0    0  p(3)   0    0;
