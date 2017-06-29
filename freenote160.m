@@ -5,13 +5,15 @@ clc
 %% params
 Kp = 10;
 Kv = 4;
-unc = 1;
+unc = 0.0;
 dt = 0.01;
-initRegion = diag(1./[0.1 0.1].^2);
+initRegion = diag(1./[0.2 0.3].^2);
 
 A = [0 1; -Kp -Kv];
 P = lyap(A',-eye(2));
 P = P/P(1,1)*initRegion(1,1);
+
+% P = initRegion;
 
 Ppv_ = P(1,2);
 Pv_  = P(2,2);
@@ -29,7 +31,7 @@ e = sdpvar(2,1);
 V = e'*P*e;
 Vdot = e'*(P*A+A'*P)*e + 2*unc*(Ppv_*epbar + Pv_*evbar);
    
-N = 300;
+N = 200;
    
 monomialOrder = 2;
 
@@ -101,7 +103,7 @@ chk = size(find(sum(coeffL1) == 0),2);
 
 %%
 ang = -pi:0.2:pi;
-for jj = 1:N-2
+for jj = 100:N-2
     figure(101);clf;
     hold on
     p = sVars(:,jj);
@@ -110,16 +112,16 @@ for jj = 1:N-2
 
     kk = 1;
     invp1 = inv(sqrtm(P));
-%     p2 = initRegion;
-%     invp2 = inv(sqrtm(p2));
+    p2 = initRegion;
+    invp2 = inv(sqrtm(p2));
     for k=1:length(ang)
         xx = invp1*[cos(ang(k));sin(ang(k))];
         plot(xx(1),xx(2),'.','markersize',15)
-%         yy = invp2*[cos(ang(k));sin(ang(k))];
+        yy = invp2*[cos(ang(k));sin(ang(k))];
 %         plot(yy(1),yy(2),'*','markersize',15)        
-%         my_phase(yy,jj);
+        my_phase(yy,jj);
     end
-   axis([-0.5 0.5 -2 2]);
+   axis([-0.1 0.1 -0.2 0.2]);
    axis equal
    grid on
    jj
@@ -127,10 +129,30 @@ for jj = 1:N-2
 end
 
 
+%%
+ang = -pi:0.2:pi;
+for jj = 198:198
+    figure(101);clf;
+    hold on
+    p = sVars(:,jj);
+    P = [p(1) p(2);
+         p(2) p(3)];
 
-
-
-
-
-
+    kk = 1;
+    invp1 = inv(sqrtm(P));
+    p2 = initRegion;
+    invp2 = inv(sqrtm(p2));
+    for k=1:length(ang)
+        xx = invp1*[cos(ang(k));sin(ang(k))];
+        plot(xx(1),xx(2),'.','markersize',15)
+        yy = invp2*[-cos(ang(k));-sin(ang(k))];
+%         plot(yy(1),yy(2),'*','markersize',15)        
+        my_phase(yy,jj);
+    end
+   axis([-0.5 0.5 -2 2]);
+   axis equal
+   grid on
+   jj
+   pause(0.01);
+end
 
