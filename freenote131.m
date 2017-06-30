@@ -7,7 +7,7 @@ xfinal = [ 0, 0, 0];
 % xinit =  [ 0, 3, 0];
 % xfinal = [ 2, 2, 0];
 
-yinit =  [ 0, 3, 0];
+yinit =  [ -10, -3, 0];
 yfinal = [ 0, 0, 0];
 
 zinit =  [-2, 3, 0];
@@ -15,7 +15,7 @@ zfinal = [ 0, 0, 0];
 % zinit =  [ 0, 3, 0];
 % zfinal = [ 2, 2, 0];
 
-amax = 30;
+amax = 20;
 g = 9.8;
 
 az = 0.2;
@@ -44,7 +44,7 @@ for k=1:100
         smaller = [];
         bigger = [];
         
-        ax_ = 0.001:0.1:0.999; ax_ = [ax_ 0.999];
+        ax_ = 0.01:0.1:0.99; ax_ = [ax_ 0.999];
         
         for kk = 1:length(ax_)                
             azmax = az*(amax - g);
@@ -90,7 +90,7 @@ for k=1:100
                 bigger = ax_;
             end
             
-            if abs(xtf - ytf) < 1e-3
+            if or(abs(xtf - ytf) < 1e-3, abs(bigger - smaller) < 1e-3)
                 ax = ax_;
                 break;
             end
@@ -102,7 +102,7 @@ for k=1:100
         smaller = [];
         bigger = [];
         
-        az_ = 0.001:0.02:0.2; 
+        az_ = 0.01:0.02:0.2; 
 %         az_ = [az_ 0.999];
         
         for kk = 1:length(az_)                
@@ -159,7 +159,7 @@ for k=1:100
                 bigger = az_;
             end
             
-            if abs(tf - ztf) < 1e-3
+            if or(abs(tf - ztf) < 1e-3, abs(smaller - bigger) < 1e-3)
                 az = az_;
                 break;
             end
@@ -171,7 +171,7 @@ for k=1:100
         smaller = [];
         bigger = [];
         
-        az_ = 0.001:0.1:0.999; az_ = [az_ 0.999];
+        az_ = 0.1:0.1:0.99; az_ = [az_ 0.999];
         
         for kk = 1:length(az_)                
             azmax = az_(kk)*(amax - g);
@@ -227,16 +227,18 @@ for k=1:100
                 bigger = az_;
             end
             
-            if abs(tf - ztf) < 1e-3
+            if or(abs(tf - ztf) < 1e-3, abs(smaller - bigger) < 1e-3)
                 az = az_;
                 break;
             end
         end                
+        
+        
 
     end
     
-    ax = min(max(ax,0.0001),0.9999);
-    az = min(max(az,0.0001),0.9999);
+    ax = min(max(ax,0.01),0.99);
+    az = min(max(az,0.01),0.99);
     
     disp([num2str(xtf),'   ',num2str(ytf),'   ',num2str(ztf),'   ',num2str(axmax),'   ',num2str(aymax),'   ',num2str(azmax),'   ',num2str(ax),'   ',num2str(az)]);
     

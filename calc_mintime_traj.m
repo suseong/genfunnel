@@ -11,7 +11,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit1);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 10;
         tfList = [tfList;chad2{k}(end)];
     end
 end
@@ -21,7 +21,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit2);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = -1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 15;
         tfList = [tfList;chad2{k}(end)];
     end
 end
@@ -32,7 +32,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit1);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 20;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -42,7 +42,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit1);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 22.5;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -52,7 +52,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit2);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = -1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 25;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -62,7 +62,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit2);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = -1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 27.5;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -73,7 +73,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit1);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 30;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -83,7 +83,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit1);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 32.5;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -93,7 +93,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit2);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = -1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 35;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -103,7 +103,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit2);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = -1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 37.5;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -114,7 +114,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit1);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 40;
         tfList = [tfList;chad2{k}(end)];        
     end
 end
@@ -124,7 +124,7 @@ for k=1:length(chad1)
     [solution,chad3{k}] = check_sol(chad1{k},initState,finalState,chad2{k},actLimit2);
     if solution
         numValidSol = numValidSol + 1;
-        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = -1;
+        infos{numValidSol,1} = chad1{k}; infos{numValidSol,2} = chad2{k}; infos{numValidSol,3} = chad3{k}; infos{numValidSol,4} = 45;
         tfList = [tfList;chad2{k}(end)];        
     end
 end

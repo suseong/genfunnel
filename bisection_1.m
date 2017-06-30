@@ -6,7 +6,7 @@ k = 0;
 
 goal = finalState(1);
 
-timeTrials = 0.2:0.5:20;
+timeTrials = 0.2:0.5:100;
 posTrials = zeros(1,length(timeTrials));
 
 for k=1:length(timeTrials)
