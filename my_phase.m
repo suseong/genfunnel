@@ -5,12 +5,12 @@ t = 0.01*k;
 [~,X] = ode45(@EOM1,[0 t],IC);
 u = X(:,1);
 w = X(:,2);
-plot(u(end),w(end),'*')
+plot(u,w)
 
-% [~,X] = ode45(@EOM2,[0 t],IC);
-% u = X(:,1);
-% w = X(:,2);
-% plot(u(end),w(end),'*')
+[~,X] = ode45(@EOM2,[0 t],IC);
+u = X(:,1);
+w = X(:,2);
+plot(u,w)
 
 xlabel('u')
 ylabel('w')
@@ -30,7 +30,7 @@ w  = y(2);
 kp = 10; kd = 4;
 % kp = 15; kd = 6;
 % if t > 2
-    dX = [w; -kp*(u)-kd*(w)];
+    dX = [w; -kp*(u)-kd*(w)+3];
 % else
 %     dX = [w; -kp*(u)-kd*(w)-1];
 % end
@@ -42,10 +42,14 @@ function dX = EOM2(t, y)
 dX = zeros(2,1);
 u  = y(1);
 w  = y(2);
+% u = X(:,1);
+% w = X(:,2);
+% plot(u(end),w(end),'*')
+
 kp = 10; kd = 4;
 % kp = 15; kd = 6;
 % if t > 2
-    dX = [w; -kp*(u)-kd*(w)-0.5];
+    dX = [w; -kp*(u)-kd*(w)-3];
 % else
 %     dX = [w; -kp*(u)-kd*(w)+1];
 % end

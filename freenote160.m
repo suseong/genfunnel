@@ -5,9 +5,9 @@ clc
 %% params
 Kp = 10;
 Kv = 4;
-unc = 0.0;
+unc = 0.03;
 dt = 0.01;
-initRegion = diag(1./[0.2 0.3].^2);
+initRegion = diag(1./[0.2 0.6].^2);
 
 A = [0 1; -Kp -Kv];
 P = lyap(A',-eye(2));
@@ -31,7 +31,7 @@ e = sdpvar(2,1);
 V = e'*P*e;
 Vdot = e'*(P*A+A'*P)*e + 2*unc*(Ppv_*epbar + Pv_*evbar);
    
-N = 200;
+N = 100;
    
 monomialOrder = 2;
 
@@ -103,7 +103,7 @@ chk = size(find(sum(coeffL1) == 0),2);
 
 %%
 ang = -pi:0.2:pi;
-for jj = 100:N-2
+for jj = 1:N-2
     figure(101);clf;
     hold on
     p = sVars(:,jj);
@@ -121,7 +121,7 @@ for jj = 100:N-2
 %         plot(yy(1),yy(2),'*','markersize',15)        
         my_phase(yy,jj);
     end
-   axis([-0.1 0.1 -0.2 0.2]);
+   axis([-0.1 0.1 -0.2 0.2]*10);
    axis equal
    grid on
    jj

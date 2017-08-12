@@ -6,7 +6,7 @@ k = 0;
 
 goal = finalState(1);
 
-timeTrials = 0.2:0.5:100;
+timeTrials = 0.02:1:20;
 posTrials = zeros(length(timeTrials),2);
 
 for k=1:length(timeTrials)
@@ -41,7 +41,7 @@ if and(~isempty(smallCont),~isempty(bigCont))
             bigCont{j} = [time;pos(idx)];
         end
         
-        for k = 1:100
+        for k = 1:200
             if (pos(idx) >= goal)
                 time = (time + smallCont{j}(1)) / 2;
             else
@@ -54,7 +54,7 @@ if and(~isempty(smallCont),~isempty(bigCont))
             else
                 bigCont{j} = [time;pos(idx)];
             end
-            if (norm(pos(idx) - goal) < 1e-3)
+            if (norm(pos(idx) - goal) < 1e-4)
                 posOut{j} = pos(idx);
                 tsqOut{j} = tsq(idx,:);
                 break;

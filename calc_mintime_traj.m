@@ -1,4 +1,4 @@
-function [time_seq,pos,acc,iter,act] = calc_mintime_traj(initState,finalState,actLimit)
+function [time_seq,pos,acc,iter,act,num,isOkay] = calc_mintime_traj(initState,finalState,actLimit)
 
 actLimit1 = actLimit; actLimit2 = -actLimit;
 numValidSol = 0;
@@ -130,17 +130,31 @@ for k=1:length(chad1)
 end
 
 %%
-if size(infos,1) > 1
-
-elseif size(infos,1) == 0
-    keyboard;
+% num = 1;
+if size(infos,1) >= 1
+%     num = size(infos,1);
+    isOkay = 1;
+else
+% elseif size(infos,1) == 0
+    isOkay = 0;
+%     keyboard;
 end
 
-[~,k] = min(tfList);
-pos = infos{k,1};
-iter = 0;
-acc = infos{k,3};
-act = infos{k,4};
-time_seq = infos{k,2};
-
+if isOkay == 1
+    [~,k] = min(tfList);
+    pos = infos{k,1};
+    iter = 0;
+    acc = infos{k,3};
+    act = infos{k,4};
+    num = 2*(floor(mod(act,10)/5)-0.5);
+    time_seq = infos{k,2};
+else
+    pos = [];
+    iter = 0;
+    acc = [];
+    act = [];
+    num = 3;
+    time_seq = [];    
+end
+    
 end

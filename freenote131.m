@@ -2,24 +2,24 @@ clear all
 close all
 % clc
 
-xinit =  [ 5,-2, 0];
-xfinal = [ 0, 0, 0];
+xinit =  [0, 0, 0];
+xfinal = [5, 0, -9];
 % xinit =  [ 0, 3, 0];
 % xfinal = [ 2, 2, 0];
 
-yinit =  [ -10, -3, 0];
-yfinal = [ 0, 0, 0];
+yinit =  [-2, 0, 0];
+yfinal = [ 0, 1, 0];
 
-zinit =  [-2, 3, 0];
-zfinal = [ 0, 0, 0];
+zinit =  [0, 0, 0];
+zfinal = [1, 0, 0];
 % zinit =  [ 0, 3, 0];
 % zfinal = [ 2, 2, 0];
 
-amax = 20;
+amax = 16.08;
 g = 9.8;
 
-az = 0.2;
-ax = 0.5;
+az = 0.2228;
+ax = 0.99;
 
 %%
 for k=1:100
@@ -27,9 +27,9 @@ for k=1:100
     axmax = ax*sqrt(amax^2 - (azmax + g)^2);
     aymax = sqrt(amax^2 - axmax^2 - (azmax + g)^2);
     
-    [xtsq,xpos,xacc,xiter,xact] = calc_mintime_traj(xinit,xfinal,[40 axmax]);
-    [ytsq,ypos,yacc,yiter,yact] = calc_mintime_traj(yinit,yfinal,[40 aymax]);
-    [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);
+    [xtsq,xpos,xacc,xiter,xact] = calc_mintime_traj(xinit,xfinal,[20 axmax]);
+    [ytsq,ypos,yacc,yiter,yact] = calc_mintime_traj(yinit,yfinal,[20 aymax]);
+    [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);
     
     xtf = xtsq(end);
     ytf = ytsq(end);
@@ -51,8 +51,8 @@ for k=1:100
             axmax = ax_(kk)*sqrt(amax^2 - (azmax + g)^2);
             aymax = sqrt(amax^2 - axmax^2 - (azmax + g)^2);
             
-            [xtsq,xpos,xacc,xiter,xact] = calc_mintime_traj(xinit,xfinal,[40 axmax]);
-            [ytsq,ypos,yacc,yiter,yact] = calc_mintime_traj(yinit,yfinal,[40 aymax]);
+            [xtsq,xpos,xacc,xiter,xact] = calc_mintime_traj(xinit,xfinal,[20 axmax]);
+            [ytsq,ypos,yacc,yiter,yact] = calc_mintime_traj(yinit,yfinal,[20 aymax]);
             
             xtf = xtsq(end);
             ytf = ytsq(end);
@@ -78,8 +78,8 @@ for k=1:100
             axmax = ax_*sqrt(amax^2 - (azmax + g)^2);
             aymax = sqrt(amax^2 - axmax^2 - (azmax + g)^2);
             
-            [xtsq,xpos,xacc,xiter,xact] = calc_mintime_traj(xinit,xfinal,[40 axmax]);
-            [ytsq,ypos,yacc,yiter,yact] = calc_mintime_traj(yinit,yfinal,[40 aymax]);
+            [xtsq,xpos,xacc,xiter,xact] = calc_mintime_traj(xinit,xfinal,[20 axmax]);
+            [ytsq,ypos,yacc,yiter,yact] = calc_mintime_traj(yinit,yfinal,[20 aymax]);
             
             xtf = xtsq(end);
             ytf = ytsq(end);
@@ -111,11 +111,11 @@ for k=1:100
             aymax = sqrt(amax^2 - axmax^2 - (azmax + g)^2);
             
             if ytf >= xtf
-                [tsq,~,~,~,~] = calc_mintime_traj(xinit,xfinal,[40 axmax]);
-                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);
+                [tsq,~,~,~,~] = calc_mintime_traj(xinit,xfinal,[20 axmax]);
+                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);
             else
-                [tsq,~,~,~,~] = calc_mintime_traj(yinit,yfinal,[40 aymax]);
-                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);                
+                [tsq,~,~,~,~] = calc_mintime_traj(yinit,yfinal,[20 aymax]);
+                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);                
             end
             
             tf = tsq(end);
@@ -143,11 +143,11 @@ for k=1:100
             aymax = sqrt(amax^2 - axmax^2 - (azmax + g)^2);
 
             if ytf >= xtf
-                [tsq,~,~,~,~] = calc_mintime_traj(xinit,xfinal,[40 axmax]);
-                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);
+                [tsq,~,~,~,~] = calc_mintime_traj(xinit,xfinal,[20 axmax]);
+                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);
             else
-                [tsq,~,~,~,~] = calc_mintime_traj(yinit,yfinal,[40 aymax]);
-                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);                
+                [tsq,~,~,~,~] = calc_mintime_traj(yinit,yfinal,[20 aymax]);
+                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);                
             end
             
             tf = tsq(end);
@@ -179,11 +179,11 @@ for k=1:100
             aymax = sqrt(amax^2 - axmax^2 - (azmax + g)^2);
             
             if ytf >= xtf
-                [tsq,~,~,~,~] = calc_mintime_traj(yinit,yfinal,[40 aymax]);
-                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);
+                [tsq,~,~,~,~] = calc_mintime_traj(yinit,yfinal,[20 aymax]);
+                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);
             else
-                [tsq,~,~,~,~] = calc_mintime_traj(xinit,xfinal,[40 axmax]);
-                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);                
+                [tsq,~,~,~,~] = calc_mintime_traj(xinit,xfinal,[20 axmax]);
+                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);                
             end
             
             tf = tsq(end);
@@ -211,11 +211,11 @@ for k=1:100
             aymax = sqrt(amax^2 - axmax^2 - (azmax + g)^2);
 
             if ytf >= xtf
-                [tsq,~,~,~,~] = calc_mintime_traj(yinit,yfinal,[40 aymax]);
-                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);
+                [tsq,~,~,~,~] = calc_mintime_traj(yinit,yfinal,[20 aymax]);
+                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);
             else
-                [tsq,~,~,~,~] = calc_mintime_traj(xinit,xfinal,[40 axmax]);
-                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[40 azmax]);                
+                [tsq,~,~,~,~] = calc_mintime_traj(xinit,xfinal,[20 axmax]);
+                [ztsq,zpos,zacc,ziter,zact] = calc_mintime_traj(zinit,zfinal,[20 azmax]);                
             end
             
             tf = tsq(end);
@@ -248,9 +248,9 @@ for k=1:100
 end
 
 %%
-[xp,xv] = show_pv(xtsq,xacc,xinit,[40 axmax],xact,100);
-[yp,yv] = show_pv(ytsq,yacc,yinit,[40 aymax],yact,100);
-[zp,zv] = show_pv(ztsq,zacc,zinit,[40 azmax],yact,100);
+[xp,xv] = show_pv(xtsq,xacc,xinit,[20 axmax],xact,100);
+[yp,yv] = show_pv(ytsq,yacc,yinit,[20 aymax],yact,100);
+[zp,zv] = show_pv(ztsq,zacc,zinit,[20 azmax],yact,100);
 
 figure(13)
 hold on

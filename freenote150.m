@@ -30,12 +30,12 @@ tt = linspace(0,ytsq(end),100);
 plot(tt,yv)
 
 %%
-pts = trackInfo;
-
-figure(1)
-hold on
-for k=1:length(pts)-1
-   plot3([pts{k}(1) pts{k+1}(1)],[pts{k}(2) pts{k+1}(2)],[pts{k}(3) pts{k+1}(3)],'-')
-   plot3(pts{k}(1),pts{k}(2),pts{k}(3),'*')
-end
-axis equal
+% pts = trackInfo;
+% 
+% figure(1)
+% hold on
+% for k=1:length(pts)-1
+%    plot3([pts{k}(1) pts{k+1}(1)],[pts{k}(2) pts{k+1}(2)],[pts{k}(3) pts{k+1}(3)],'-')
+%    plot3(pts{k}(1),pts{k}(2),pts{k}(3),'*')
+% end
+% axis equal

@@ -51,7 +51,7 @@ Pnext = [p(1)   0    0  p(3)   0    0;
 
 V = e'*P*e;
 Vdot = e'*(P*A+A'*P)*e ...
-       + 2*(unc + Er*(unc + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar) ...
+       + 2*(unc + Er*(maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar) ...
        + e'*(Pnext - P)*e / dt;
 rhodot = (rho(k+1) - rho(k))/dt;
 
@@ -137,12 +137,12 @@ P = [p(1)   0    0  p(3)   0    0;
                    0    0  p(4)   0    0  p(6)];
 
         Vdot = e'*(P*A+A'*P)*e ...
-            + 2*(unc + Er*(unc + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar) ...
+            + 2*(unc + Er*(maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar) ...
             + e'*(Pnext - P)*e / dt;
         rhodot = (rho(k+1) - rho(k))/dt;
     else
         Vdot = e'*(P*A+A'*P)*e ...
-            + 2*(unc + Er*(unc + maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar);
+            + 2*(unc + Er*(maxKp*epbar + maxKd*edbar + ar))*(Ppv*epbar + Pv*edbar);
         rhodot = 0;        
     end
     
